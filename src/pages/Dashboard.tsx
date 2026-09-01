@@ -262,7 +262,7 @@ export default function Dashboard() {
     <div className="space-y-6">
       <DashboardHeader monthView={monthView} onChangeMonthView={setMonthView} onQuickSpend={() => setIsQuickSpendOpen(true)} />
 
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <QuickStatCard label="Total Saldo" value={formatCurrency(liquidCash, baseCurrency)} icon={Wallet} changePct={totalSaldoChangePct} isPrivate={isPrivate} />
         <QuickStatCard
           label="Pemasukan"
@@ -286,47 +286,37 @@ export default function Dashboard() {
         <FinancialHealthGauge score={healthScore} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-        <div className="lg:col-span-5">
-          <CashFlowChart data={cashFlowData} currency={baseCurrency} monthLabel={monthLabel} />
-        </div>
-        <div className="lg:col-span-3">
-          <div className="card p-5 h-full">
-            <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-1">Rincian Pengeluaran</h2>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-2">{monthLabel}</p>
-            {expenseBreakdown.length === 0 ? (
-              <div className="h-56 flex items-center justify-center text-sm text-neutral-400">Belum ada pengeluaran</div>
-            ) : (
-              <AllocationDonutChart data={expenseBreakdown} currency={baseCurrency} />
-            )}
-          </div>
-        </div>
-        <div className="lg:col-span-2">
-          <UpcomingBills bills={bills} currency={baseCurrency} onMarkPaid={markPaid} onAdd={() => setIsBillFormOpen(true)} />
-        </div>
-        <div className="lg:col-span-2">
-          <SavingsGoalsProgress
-            goals={savingsGoals}
-            currency={baseCurrency}
-            onAddGoal={() => setIsGoalFormOpen(true)}
-            onContribute={(g) => setContributingGoal(g)}
-          />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+        <CashFlowChart data={cashFlowData} currency={baseCurrency} monthLabel={monthLabel} />
+        <div className="card p-5 h-full">
+          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-1">Rincian Pengeluaran</h2>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-2">{monthLabel}</p>
+          {expenseBreakdown.length === 0 ? (
+            <div className="h-56 flex items-center justify-center text-sm text-neutral-400">Belum ada pengeluaran</div>
+          ) : (
+            <AllocationDonutChart data={expenseBreakdown} currency={baseCurrency} />
+          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-        <div className="lg:col-span-3">
-          <AIInsightCard insights={insights} />
-        </div>
-        <div className="lg:col-span-4">
-          <MonthlyTrendChart data={monthlyTrendData} currency={baseCurrency} />
-        </div>
-        <div className="lg:col-span-2">
-          <BillsSummaryCard bills={bills} currency={baseCurrency} />
-        </div>
-        <div className="lg:col-span-3">
-          <AccountBalancesList accounts={accounts} isPrivate={isPrivate} />
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+        <UpcomingBills bills={bills} currency={baseCurrency} onMarkPaid={markPaid} onAdd={() => setIsBillFormOpen(true)} />
+        <SavingsGoalsProgress
+          goals={savingsGoals}
+          currency={baseCurrency}
+          onAddGoal={() => setIsGoalFormOpen(true)}
+          onContribute={(g) => setContributingGoal(g)}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+        <AIInsightCard insights={insights} />
+        <MonthlyTrendChart data={monthlyTrendData} currency={baseCurrency} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+        <BillsSummaryCard bills={bills} currency={baseCurrency} />
+        <AccountBalancesList accounts={accounts} isPrivate={isPrivate} />
       </div>
 
       <PortfolioPulseBar items={pulseItems} />

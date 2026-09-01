@@ -26,7 +26,7 @@ export default function FlowAiConfig() {
           </div>
           <button
             onClick={() => setSettings({ ...settings, enabled: !settings.enabled })}
-            className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${settings.enabled ? "bg-emerald-500" : "bg-neutral-300 dark:bg-neutral-700"}`}
+            className={`w-11 h-6 rounded-full transition-colors relative shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#18191E] ${settings.enabled ? "bg-emerald-500" : "bg-neutral-300 dark:bg-neutral-700"}`}
           >
             <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${settings.enabled ? "translate-x-5" : "translate-x-0.5"}`} />
           </button>
@@ -55,7 +55,7 @@ export default function FlowAiConfig() {
           </div>
           <button
             onClick={() => setSettings({ ...settings, showTopExpenseInsight: !settings.showTopExpenseInsight })}
-            className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${settings.showTopExpenseInsight ? "bg-emerald-500" : "bg-neutral-300 dark:bg-neutral-700"}`}
+            className={`w-11 h-6 rounded-full transition-colors relative shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#18191E] ${settings.showTopExpenseInsight ? "bg-emerald-500" : "bg-neutral-300 dark:bg-neutral-700"}`}
           >
             <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${settings.showTopExpenseInsight ? "translate-x-5" : "translate-x-0.5"}`} />
           </button>
@@ -68,7 +68,7 @@ export default function FlowAiConfig() {
           </div>
           <button
             onClick={() => setSettings({ ...settings, showGoalFocusInsight: !settings.showGoalFocusInsight })}
-            className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${settings.showGoalFocusInsight ? "bg-emerald-500" : "bg-neutral-300 dark:bg-neutral-700"}`}
+            className={`w-11 h-6 rounded-full transition-colors relative shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#18191E] ${settings.showGoalFocusInsight ? "bg-emerald-500" : "bg-neutral-300 dark:bg-neutral-700"}`}
           >
             <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${settings.showGoalFocusInsight ? "translate-x-5" : "translate-x-0.5"}`} />
           </button>

@@ -27,15 +27,14 @@ export function QuickStatCard({
   const isGood = invertTone ? !isUp : isUp;
 
   return (
-    <motion.div whileHover={{ y: -3, transition: { duration: 0.2 } }} className="card p-4 flex flex-col gap-1.5 min-w-0 overflow-hidden">
+    <motion.div whileHover={{ y: -3, transition: { duration: 0.2 } }} className="card p-4 flex flex-col gap-1.5 min-w-0">
       <div className="flex items-center justify-between gap-2">
         <span className="text-[11px] font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wide truncate">{label}</span>
         {Icon && <Icon size={14} className="text-neutral-300 dark:text-neutral-600 shrink-0" />}
       </div>
       <span
-        title={isPrivate ? undefined : value}
         className={clsx(
-          "text-base sm:text-lg font-bold tracking-tight font-mono-numbers text-neutral-900 dark:text-neutral-50 truncate block",
+          "text-lg sm:text-xl font-bold tracking-tight font-mono-numbers text-neutral-900 dark:text-neutral-50 leading-snug break-words",
           tone === "positive" && "text-emerald-600 dark:text-emerald-400",
           tone === "negative" && "text-rose-600 dark:text-rose-400"
         )}
