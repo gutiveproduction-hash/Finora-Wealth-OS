@@ -3,6 +3,7 @@ dist/
 dist-electron/
 release/
 *.log
+*.tsbuildinfo
 .DS_Store
 Thumbs.db
 .env

@@ -1,6 +1,6 @@
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import type { NetWorthSnapshot } from "@/types";
-import { formatCurrency, formatDate } from "@/lib/format";
+import { formatCurrency, formatCompactCurrency, formatDate } from "@/lib/format";
 
 export function NetWorthTrendChart({ snapshots, baseCurrency }: { snapshots: NetWorthSnapshot[]; baseCurrency: string }) {
   const data = snapshots.map((s) => ({
@@ -37,11 +37,11 @@ export function NetWorthTrendChart({ snapshots, baseCurrency }: { snapshots: Net
           minTickGap={24}
         />
         <YAxis
-          tickFormatter={(v) => formatCurrency(v, baseCurrency).replace(/\.00$/, "")}
+          tickFormatter={(v) => formatCompactCurrency(v, baseCurrency)}
           tick={{ fontSize: 11, fill: "#94a3b8" }}
           axisLine={false}
           tickLine={false}
-          width={80}
+          width={64}
         />
         <Tooltip
           formatter={(value: number, name: string) => [

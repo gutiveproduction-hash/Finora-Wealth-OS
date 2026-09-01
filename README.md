@@ -94,11 +94,39 @@ Useful scripts:
 | Script                | What it does                                              |
 | --------------------- | ---------------------------------------------------------- |
 | `npm run electron:dev`| Run the app in development mode with hot reload             |
+| `npm run preview`     | Quick look in an ordinary browser tab, no Electron — see below |
 | `npm run typecheck`   | Type-check both the renderer and the Electron main process  |
 | `npm run build`       | Build the renderer (Vite) + compile the Electron main process |
 | `npm run dist:mac`    | Build + package a macOS installer (.dmg/.zip) — run on macOS |
 | `npm run dist:win`    | Build + package a Windows installer (.exe) — run on Windows  |
 | `npm run dist:dir`    | Build + package an unpacked app (fastest, for local testing) |
+
+## Quick preview in a browser (no Electron)
+
+My Networth is a desktop app, but you can take a quick look at the UI in an ordinary browser tab
+without installing it, using sample data:
+
+```bash
+npm install
+npm run build
+npm run preview
+```
+
+This opens `http://localhost:4173` with an amber "Mode Pratinjau Browser" banner. In this mode the
+app runs entirely against a small in-memory/`localStorage`-backed stand-in for the real database
+(see `src/lib/mockApi.ts`), seeded with sample accounts, transactions, and a portfolio — nothing is
+saved to disk, CSV import and file-based backup are disabled with an explanatory message, and
+whatever you enter only sticks around in that browser's local storage. It's for kicking the tires
+on the UI, not for real use — run `npm run electron:dev` (or a built installer) for the real thing
+with a persistent local SQLite database.
+
+> **Why can't I just double-click `dist/index.html`?** Chrome (and most modern browsers) refuse to
+> load `<script type="module">` from a `file://` URL — the page gets an opaque origin and every
+> script/asset request is blocked by CORS, so you'd see a blank white page and a console full of
+> "blocked by CORS policy" errors. This is a browser security restriction, not a bug specific to
+> this project; it's why `npm run preview` spins up a real (if tiny) local HTTP server instead.
+> Electron itself isn't affected by this — it loads local files differently than a regular browser
+> tab does, which is why the desktop app works fine without any of this.
 
 ## Building installers
 

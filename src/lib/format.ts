@@ -22,6 +22,21 @@ export function formatCurrency(amount: number, currency = "IDR"): string {
   }
 }
 
+/** Compact form for chart axes, e.g. "Rp328jt" / "$62rb" instead of the full "Rp328.000.000". */
+export function formatCompactCurrency(amount: number, currency = "IDR"): string {
+  const locale = currencyLocaleMap[currency] ?? "en-US";
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency,
+      notation: "compact",
+      maximumFractionDigits: 1,
+    }).format(amount);
+  } catch {
+    return `${currency} ${amount.toLocaleString()}`;
+  }
+}
+
 export function formatNumber(value: number, maximumFractionDigits = 2): string {
   return new Intl.NumberFormat("id-ID", { maximumFractionDigits }).format(value);
 }

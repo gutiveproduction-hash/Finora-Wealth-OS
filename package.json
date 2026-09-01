@@ -10,6 +10,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "preview": "vite preview --port 4173 --open",
     "build": "tsc -b && vite build && npm run build:electron",
     "typecheck": "tsc -b --noEmit && tsc -p electron/tsconfig.json --noEmit",
     "electron:dev": "npm run build:electron && concurrently -k \"vite\" \"wait-on tcp:5173 && cross-env NODE_ENV=development electron .\"",
