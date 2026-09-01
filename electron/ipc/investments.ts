@@ -7,20 +7,9 @@ import { newId, nowIso } from "../utils/id";
 export function registerInvestmentHandlers() {
   // ---- Assets -------------------------------------------------------------
   ipcMain.handle("assets:list", async () => {
-    const sqlite = getRawSqlite();
-    const rows = sqlite.prepare("SELECT * FROM assets ORDER BY name ASC").all() as Array<{
-      id: string;
-      currentPrice: number;
-      currency: string;
-    }>;
-    const holdingRows = sqlite.prepare("SELECT * FROM holdings").all() as Array<{
-      id: string;
-      assetId: string;
-      quantity: number;
-      avgBuyPrice: number;
-      accountId: string | null;
-      currency: string;
-    }>;
+    const db = getDb();
+    const rows = await db.select().from(assets).orderBy(assets.name);
+    const holdingRows = await db.select().from(holdings);
 
     return rows.map((asset) => {
       const assetHoldings = holdingRows.filter((h) => h.assetId === asset.id);

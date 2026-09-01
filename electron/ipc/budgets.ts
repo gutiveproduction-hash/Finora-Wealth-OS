@@ -1,16 +1,16 @@
 import { ipcMain } from "electron";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { getDb, getRawSqlite } from "../db";
 import { budgets } from "../db/schema";
 import { newId, nowIso } from "../utils/id";
 
 export function registerBudgetHandlers() {
   ipcMain.handle("budgets:list", async (_e, month?: string) => {
-    const sqlite = getRawSqlite();
+    const db = getDb();
     if (month) {
-      return sqlite.prepare("SELECT * FROM budgets WHERE month = ?").all(month);
+      return db.select().from(budgets).where(eq(budgets.month, month));
     }
-    return sqlite.prepare("SELECT * FROM budgets ORDER BY month DESC").all();
+    return db.select().from(budgets).orderBy(desc(budgets.month));
   });
 
   /** Creates or updates the budget for a category+month in one call (upsert on the unique index). */
