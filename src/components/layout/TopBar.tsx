@@ -23,7 +23,7 @@ export function TopBar() {
   const location = useLocation();
   const theme = useSettingsStore((s) => s.theme);
   const setTheme = useSettingsStore((s) => s.setTheme);
-  const title = TITLES[location.pathname] ?? "Dompetku";
+  const title = TITLES[location.pathname] ?? "My Networth";
 
   return (
     <header className="h-16 shrink-0 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between px-6 bg-white/80 dark:bg-neutral-900/80 backdrop-blur">

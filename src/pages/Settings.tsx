@@ -196,10 +196,10 @@ export default function Settings() {
       </section>
 
       <section className="card p-5 space-y-2 text-sm text-neutral-500">
-        <h2 className="font-medium text-neutral-700 dark:text-neutral-200">Tentang Dompetku</h2>
+        <h2 className="font-medium text-neutral-700 dark:text-neutral-200">Tentang My Networth</h2>
         <p>Versi {version || "-"}</p>
         <p>
-          Dompetku adalah aplikasi pelacak keuangan pribadi &amp; portofolio investasi yang open source (lisensi MIT),
+          My Networth adalah aplikasi pelacak keuangan pribadi &amp; portofolio investasi yang open source (lisensi MIT),
           dibuat untuk berjalan sepenuhnya offline di komputer Anda.
         </p>
       </section>

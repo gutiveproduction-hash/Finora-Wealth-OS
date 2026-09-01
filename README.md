@@ -1,14 +1,14 @@
-# Dompetku 💰
+# My Networth 💰
 
-**Dompetku** ("my wallet" in Indonesian) is a free, open-source personal finance & investment
-portfolio tracker. It's a desktop app for macOS and Windows that runs **100% offline** — your
-financial data never leaves your computer, because there is no server, no account, and no
-telemetry. Everything is stored in a local SQLite database on your own machine.
+**My Networth** is a free, open-source personal finance & investment portfolio tracker. It's a
+desktop app for macOS and Windows that runs **100% offline** — your financial data never leaves
+your computer, because there is no server, no account, and no telemetry. Everything is stored in a
+local SQLite database on your own machine.
 
 This project started as a small charity/community effort to give people a private, no-strings
 alternative to subscription finance apps. Contributions are welcome — see [Contributing](#contributing).
 
-> ⚠️ **Disclaimer**: Dompetku is a bookkeeping tool, not financial or investment advice. Exchange
+> ⚠️ **Disclaimer**: My Networth is a bookkeeping tool, not financial or investment advice. Exchange
 > rates and asset prices are entered manually (there is no live market data feed, by design — see
 > [Offline by design](#offline-by-design)). Always verify important numbers yourself.
 
@@ -31,7 +31,7 @@ alternative to subscription finance apps. Contributions are welcome — see [Con
 
 ## Offline by design
 
-Dompetku deliberately has **no network calls**. There's no live stock/crypto price feed and no
+My Networth deliberately has **no network calls**. There's no live stock/crypto price feed and no
 automatic exchange-rate updates — you enter and update prices and rates yourself in-app (see
 Investments → "Update Harga" and Settings → Kurs Konversi). This is a conscious trade-off: it
 means your portfolio and spending data can never be sent anywhere, at the cost of prices not
@@ -51,7 +51,7 @@ updating themselves. If you want live pricing, that's a good area to contribute 
 ## Project structure
 
 ```
-dompetku/
+my-networth/
 ├─ electron/              # Main process (Node.js) — never bundled by Vite
 │  ├─ main.ts             # Window creation, app lifecycle
 │  ├─ preload.ts          # contextBridge — the only surface the renderer can call
@@ -80,8 +80,8 @@ toolchain (Xcode Command Line Tools on macOS, or Visual Studio Build Tools + Pyt
 usually already present, `npm install` will tell you if not).
 
 ```bash
-git clone https://github.com/<your-username>/dompetku.git
-cd dompetku
+git clone https://github.com/<your-username>/my-networth.git
+cd my-networth
 npm install
 npm run electron:dev
 ```
@@ -106,8 +106,8 @@ electron-builder can cross-compile Linux→Linux and, with some setup, Linux→W
 targets (.dmg) can only be built on macOS** (an Apple restriction on the packaging tools, not this
 project). The recommended way to get both installers is:
 
-- **On a Mac**: `npm install && npm run dist:mac` → produces `release/Dompetku-<version>.dmg`
-- **On Windows**: `npm install && npm run dist:win` → produces `release/Dompetku Setup <version>.exe`
+- **On a Mac**: `npm install && npm run dist:mac` → produces `release/My Networth-<version>.dmg`
+- **On Windows**: `npm install && npm run dist:win` → produces `release/My Networth Setup <version>.exe`
   (installer) and a portable `.exe`
 
 The included GitHub Actions workflow (`.github/workflows/build.yml`) does exactly this automatically
@@ -130,8 +130,8 @@ corresponding `CSC_LINK` / `CSC_KEY_PASSWORD` (mac) or `WIN_CSC_LINK` / `WIN_CSC
 
 Your data lives in a single SQLite file on your own machine:
 
-- macOS: `~/Library/Application Support/Dompetku/dompetku.sqlite3`
-- Windows: `%APPDATA%\Dompetku\dompetku.sqlite3`
+- macOS: `~/Library/Application Support/My Networth/my-networth.sqlite3`
+- Windows: `%APPDATA%\My Networth\my-networth.sqlite3`
 
 You can find the exact path any time in **Settings → Buka Lokasi File Database**, and back up your
 data anytime with **Settings → Ekspor Data (JSON)**.

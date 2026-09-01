@@ -8,17 +8,17 @@ import * as schema from "./schema";
 
 /**
  * Where the sqlite file lives on disk:
- *   macOS:   ~/Library/Application Support/Dompetku/dompetku.sqlite3
- *   Windows: %APPDATA%/Dompetku/dompetku.sqlite3
- *   Linux:   ~/.config/Dompetku/dompetku.sqlite3
+ *   macOS:   ~/Library/Application Support/My Networth/my-networth.sqlite3
+ *   Windows: %APPDATA%/My Networth/my-networth.sqlite3
+ *   Linux:   ~/.config/My Networth/my-networth.sqlite3
  * `app.getPath("userData")` resolves all three automatically. In non-electron
- * contexts (e.g. tests) DOMPETKU_DB_PATH can override this.
+ * contexts (e.g. tests) MY_NETWORTH_DB_PATH can override this.
  */
 export function getDbPath(): string {
-  if (process.env.DOMPETKU_DB_PATH) return process.env.DOMPETKU_DB_PATH;
+  if (process.env.MY_NETWORTH_DB_PATH) return process.env.MY_NETWORTH_DB_PATH;
   const dir = app.getPath("userData");
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  return path.join(dir, "dompetku.sqlite3");
+  return path.join(dir, "my-networth.sqlite3");
 }
 
 let sqlite: Database.Database | null = null;

@@ -1,6 +1,6 @@
-appId: com.dompetku.app
-productName: Dompetku
-copyright: "Copyright © 2026 Dompetku Contributors"
+appId: com.mynetworth.app
+productName: My Networth
+copyright: "Copyright © 2026 My Networth Contributors"
 directories:
   buildResources: build
   output: release

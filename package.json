@@ -1,9 +1,9 @@
 {
-  "name": "dompetku",
-  "productName": "Dompetku",
+  "name": "my-networth",
+  "productName": "My Networth",
   "version": "0.1.0",
   "description": "Open-source personal finance & investment portfolio tracker. Offline-first desktop app for macOS and Windows.",
-  "author": "Dompetku Contributors",
+  "author": "My Networth Contributors",
   "license": "MIT",
   "private": true,
   "main": "dist-electron/main.js",

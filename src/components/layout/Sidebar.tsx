@@ -27,10 +27,10 @@ export function Sidebar() {
     <aside className="w-64 shrink-0 border-r border-neutral-200 dark:border-neutral-800 flex flex-col h-full bg-white dark:bg-neutral-900">
       <div className="px-5 py-5 flex items-center gap-2">
         <div className="h-8 w-8 rounded-lg bg-brand-600 flex items-center justify-center text-white font-bold">
-          D
+          M
         </div>
         <div>
-          <div className="font-semibold leading-tight">Dompetku</div>
+          <div className="font-semibold leading-tight">My Networth</div>
           <div className="text-[11px] text-neutral-400 leading-tight">Personal Finance</div>
         </div>
       </div>

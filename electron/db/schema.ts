@@ -1,7 +1,7 @@
 import { sqliteTable, text, real, integer, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 /**
- * Dompetku database schema (SQLite via drizzle-orm).
+ * My Networth database schema (SQLite via drizzle-orm).
  *
  * Design notes:
  * - Every table uses a TEXT uuid primary key (generated in app code) rather than

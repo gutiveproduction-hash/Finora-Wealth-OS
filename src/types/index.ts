@@ -128,7 +128,7 @@ export interface CsvColumnMapping {
 }
 
 /** Mirrors the surface exposed by electron/preload.ts via contextBridge. */
-export interface DompetkuApi {
+export interface MyNetworthApi {
   accounts: {
     list: () => Promise<Account[]>;
     create: (input: Partial<Account>) => Promise<Account>;
@@ -211,6 +211,6 @@ export interface DompetkuApi {
 
 declare global {
   interface Window {
-    api: DompetkuApi;
+    api: MyNetworthApi;
   }
 }

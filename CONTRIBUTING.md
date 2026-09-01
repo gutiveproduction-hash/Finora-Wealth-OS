@@ -1,4 +1,4 @@
-# Contributing to Dompetku
+# Contributing to My Networth
 
 Thanks for considering a contribution! This is a small community/charity project, so the process
 is intentionally lightweight.
@@ -29,7 +29,7 @@ Please include:
 - Your OS and version (e.g. "macOS 15.1" or "Windows 11 23H2")
 - Steps to reproduce
 - What you expected vs. what happened
-- The app version (Settings → Tentang Dompetku)
+- The app version (Settings → Tentang My Networth)
 
 ## Code style
 
@@ -38,7 +38,7 @@ Please include:
 - The renderer (`src/`) never touches Node.js or Electron APIs directly — everything goes through
   `window.api`, which is defined in `electron/preload.ts` and typed in `src/types/index.ts`. If you
   need a new capability, add an IPC handler in `electron/ipc/`, expose it in `preload.ts`, and add
-  its type to `DompetkuApi` in `src/types/index.ts`.
+  its type to `MyNetworthApi` in `src/types/index.ts`.
 - Tailwind utility classes are preferred over new CSS; shared button/input styles live in
   `src/index.css` under `@layer components` (`.btn-primary`, `.input`, `.card`, etc.).
 

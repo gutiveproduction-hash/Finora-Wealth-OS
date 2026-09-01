@@ -84,4 +84,4 @@ const api = {
 
 contextBridge.exposeInMainWorld("api", api);
 
-export type DompetkuApi = typeof api;
+export type MyNetworthApi = typeof api;

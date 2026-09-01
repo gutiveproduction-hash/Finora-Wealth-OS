@@ -32,7 +32,7 @@ export default function App() {
   if (!loaded) {
     return (
       <div className="h-screen w-screen flex items-center justify-center text-neutral-400 text-sm">
-        Memuat Dompetku...
+        Memuat My Networth...
       </div>
     );
   }
