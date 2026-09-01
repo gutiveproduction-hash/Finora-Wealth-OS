@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { Link } from "react-router-dom";
 import { Plus, Target } from "lucide-react";
 import type { SavingsGoal } from "@/hooks/useSavingsGoals";
 import { formatCompactCurrency } from "@/lib/format";
@@ -18,9 +19,14 @@ export function SavingsGoalsProgress({
     <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 }} className="card p-5 h-full flex flex-col">
       <div className="flex items-center justify-between pb-3">
         <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Progres Target</h2>
-        <button onClick={onAddGoal} className="text-xs text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white inline-flex items-center gap-1">
-          <Plus size={12} /> Tambah
-        </button>
+        <div className="flex items-center gap-3">
+          <Link to="/targets" className="text-xs text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white underline">
+            Kelola
+          </Link>
+          <button onClick={onAddGoal} className="text-xs text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white inline-flex items-center gap-1">
+            <Plus size={12} /> Tambah
+          </button>
+        </div>
       </div>
 
       {goals.length === 0 ? (

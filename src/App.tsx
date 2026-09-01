@@ -13,6 +13,9 @@ import Budgets from "@/pages/Budgets";
 import Liabilities from "@/pages/Liabilities";
 import NetWorth from "@/pages/NetWorth";
 import Settings from "@/pages/Settings";
+import TargetsAndBills from "@/pages/TargetsAndBills";
+import FlowAiConfig from "@/pages/FlowAiConfig";
+import Guide from "@/pages/Guide";
 
 export default function App() {
   const loaded = useSettingsStore((s) => s.loaded);
@@ -71,6 +74,9 @@ export default function App() {
               <Route path="/budgets" element={<Budgets />} />
               <Route path="/liabilities" element={<Liabilities />} />
               <Route path="/networth" element={<NetWorth />} />
+              <Route path="/targets" element={<TargetsAndBills />} />
+              <Route path="/flowai" element={<FlowAiConfig />} />
+              <Route path="/guide" element={<Guide />} />
               <Route path="/settings" element={<Settings />} />
             </Routes>
           </main>

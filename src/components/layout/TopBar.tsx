@@ -4,12 +4,15 @@ import { useSettingsStore, applyThemeClass, type ThemePreference } from "@/store
 
 const TITLES: Record<string, string> = {
   "/": "Dashboard",
-  "/transactions": "Transaksi",
-  "/accounts": "Akun",
+  "/transactions": "Riwayat Transaksi",
+  "/accounts": "Daftar Akun",
   "/investments": "Portofolio Investasi",
-  "/budgets": "Anggaran",
+  "/budgets": "Budgeting & Prediksi",
   "/liabilities": "Utang & Liabilitas",
-  "/networth": "Kekayaan Bersih",
+  "/networth": "Laporan Keuangan",
+  "/targets": "Target & Tagihan",
+  "/flowai": "FlowAI Config",
+  "/guide": "Panduan",
   "/settings": "Pengaturan",
 };
 

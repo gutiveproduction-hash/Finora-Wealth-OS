@@ -30,6 +30,7 @@ import { useCategories } from "@/hooks/useCategories";
 import { useGoal } from "@/hooks/useGoal";
 import { useSavingsGoals, type SavingsGoal } from "@/hooks/useSavingsGoals";
 import { useBills } from "@/hooks/useBills";
+import { useAiInsightSettings } from "@/hooks/useAiInsightSettings";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { toBase } from "@/lib/currency";
 import { formatCompactCurrency, formatCurrency, currentMonth, shiftMonth, daysInMonth } from "@/lib/format";
@@ -51,6 +52,7 @@ export default function Dashboard() {
   const { goal, setGoal } = useGoal();
   const { goals: savingsGoals, addGoal, contribute } = useSavingsGoals();
   const { bills, addBill, markPaid } = useBills();
+  const { settings: aiSettings } = useAiInsightSettings();
 
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [isGoalFormOpen, setIsGoalFormOpen] = useState(false);
@@ -221,26 +223,27 @@ export default function Dashboard() {
 
   const insights = useMemo(() => {
     const lines: string[] = [];
+    if (!aiSettings.enabled) return lines;
     if (selectedTotals.income > 0) {
       lines.push(
-        savingsRate >= 20
+        savingsRate >= aiSettings.healthySavingsRate
           ? `Kamu sudah mencapai ${savingsRate.toFixed(1)}% saving rate bulan ini. Pertahankan!`
           : `Saving rate bulan ini baru ${savingsRate.toFixed(1)}%, coba kurangi pengeluaran non-esensial.`
       );
     }
-    if (expenseBreakdown.length > 0) {
+    if (aiSettings.showTopExpenseInsight && expenseBreakdown.length > 0) {
       const top = expenseBreakdown[0];
       const pct = selectedTotals.expense > 0 ? (top.value / selectedTotals.expense) * 100 : 0;
       lines.push(`Kategori ${top.name} adalah pengeluaran terbesar bulan ini (${pct.toFixed(1)}%).`);
     }
-    if (savingsGoals.length > 0) {
+    if (aiSettings.showGoalFocusInsight && savingsGoals.length > 0) {
       const lowest = [...savingsGoals].sort(
         (a, b) => (a.currentAmount / (a.targetAmount || 1)) - (b.currentAmount / (b.targetAmount || 1))
       )[0];
       lines.push(`Fokus tabungan: ${lowest.title}. Kamu pasti bisa!`);
     }
     return lines;
-  }, [selectedTotals, savingsRate, expenseBreakdown, savingsGoals]);
+  }, [selectedTotals, savingsRate, expenseBreakdown, savingsGoals, aiSettings]);
 
   async function refreshAfterQuickSpend() {
     await Promise.all([refreshRecent(), refreshExpenseHistory(), refreshAllTransactions(), refreshAccounts(), refreshNetWorth()]);
@@ -259,7 +262,7 @@ export default function Dashboard() {
     <div className="space-y-6">
       <DashboardHeader monthView={monthView} onChangeMonthView={setMonthView} onQuickSpend={() => setIsQuickSpendOpen(true)} />
 
-      <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
         <QuickStatCard label="Total Saldo" value={formatCurrency(liquidCash, baseCurrency)} icon={Wallet} changePct={totalSaldoChangePct} isPrivate={isPrivate} />
         <QuickStatCard
           label="Pemasukan"

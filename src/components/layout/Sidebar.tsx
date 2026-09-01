@@ -1,25 +1,60 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   ArrowLeftRight,
+  PlusCircle,
   Wallet,
+  Target,
   TrendingUp,
   PiggyBank,
   Landmark,
   LineChart,
+  Sparkles,
+  BookOpen,
   Settings,
   Layers,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import clsx from "clsx";
 
-const NAV_ITEMS = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/transactions", label: "Transaksi", icon: ArrowLeftRight },
-  { to: "/accounts", label: "Akun", icon: Wallet },
-  { to: "/investments", label: "Portofolio", icon: TrendingUp },
-  { to: "/budgets", label: "Anggaran", icon: PiggyBank },
-  { to: "/liabilities", label: "Utang", icon: Landmark },
-  { to: "/networth", label: "Kekayaan Bersih", icon: LineChart },
+interface NavItem {
+  to: string;
+  label: string;
+  icon: LucideIcon;
+  end?: boolean;
+}
+
+interface NavSection {
+  label: string;
+  items: NavItem[];
+}
+
+const NAV_SECTIONS: NavSection[] = [
+  {
+    label: "Menu Utama",
+    items: [
+      { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
+      { to: "/transactions", label: "Riwayat Transaksi", icon: ArrowLeftRight },
+    ],
+  },
+  {
+    label: "Modul",
+    items: [
+      { to: "/accounts", label: "Daftar Akun", icon: Wallet },
+      { to: "/targets", label: "Target & Tagihan", icon: Target },
+      { to: "/investments", label: "Portofolio Investasi", icon: TrendingUp },
+      { to: "/networth", label: "Laporan Keuangan", icon: LineChart },
+      { to: "/budgets", label: "Budgeting & Prediksi", icon: PiggyBank },
+      { to: "/liabilities", label: "Utang", icon: Landmark },
+    ],
+  },
+  {
+    label: "Bantuan",
+    items: [
+      { to: "/flowai", label: "FlowAI Config", icon: Sparkles },
+      { to: "/guide", label: "Panduan", icon: BookOpen },
+    ],
+  },
 ];
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -31,6 +66,8 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   );
 
 export function Sidebar() {
+  const navigate = useNavigate();
+
   return (
     <aside className="w-64 shrink-0 border-r border-neutral-200/70 dark:border-neutral-800/80 flex flex-col h-full bg-white dark:bg-[#18191E]">
       <div className="px-5 py-5 flex items-center gap-3">
@@ -49,12 +86,30 @@ export function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
-        {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
-          <NavLink key={to} to={to} end={end} className={navLinkClass}>
-            <Icon size={18} />
-            {label}
-          </NavLink>
+      <nav className="flex-1 px-3 space-y-4 overflow-y-auto">
+        {NAV_SECTIONS.map((section, idx) => (
+          <div key={section.label} className={idx === 0 ? "" : "pt-1"}>
+            <div className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-600">
+              {section.label}
+            </div>
+            <div className="space-y-1">
+              {idx === 0 && (
+                <button
+                  onClick={() => navigate("/transactions", { state: { openCreate: true } })}
+                  className="w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 hover:text-neutral-900 dark:hover:text-white"
+                >
+                  <PlusCircle size={18} />
+                  Tambah Transaksi
+                </button>
+              )}
+              {section.items.map(({ to, label, icon: Icon, end }) => (
+                <NavLink key={to} to={to} end={end} className={navLinkClass}>
+                  <Icon size={18} />
+                  {label}
+                </NavLink>
+              ))}
+            </div>
+          </div>
         ))}
       </nav>
 

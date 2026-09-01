@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Plus, Upload, Pencil, Trash2, ArrowLeftRight } from "lucide-react";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useAccounts } from "@/hooks/useAccounts";
@@ -22,6 +23,8 @@ const emptyForm = {
 };
 
 export default function Transactions() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [filterAccount, setFilterAccount] = useState("");
   const [filterType, setFilterType] = useState<TransactionType | "">("");
   const [search, setSearch] = useState("");
@@ -49,6 +52,16 @@ export default function Transactions() {
     setForm({ ...emptyForm, accountId: accounts[0]?.id ?? "" });
     setModalOpen(true);
   }
+
+  // "Tambah Transaksi" in the sidebar navigates here with { openCreate: true } state
+  // to open the create form immediately instead of just showing the list.
+  useEffect(() => {
+    if ((location.state as { openCreate?: boolean } | null)?.openCreate) {
+      openCreate();
+      navigate(location.pathname, { replace: true, state: null });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state]);
 
   function openEdit(tx: Transaction) {
     setEditing(tx);
