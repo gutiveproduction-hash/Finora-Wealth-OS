@@ -20,7 +20,7 @@ import type {
 /**
  * Browser demo/preview mode.
  *
- * My Networth is a desktop app: the real `window.api` is injected by
+ * Finora is a desktop app: the real `window.api` is injected by
  * electron/preload.ts and backed by a local SQLite database. That only
  * exists when the app runs inside Electron.
  *

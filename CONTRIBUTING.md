@@ -1,4 +1,4 @@
-# Contributing to My Networth
+# Contributing to Finora
 
 Thanks for considering a contribution! This is a small community/charity project, so the process
 is intentionally lightweight.
@@ -29,7 +29,7 @@ Please include:
 - Your OS and version (e.g. "macOS 15.1" or "Windows 11 23H2")
 - Steps to reproduce
 - What you expected vs. what happened
-- The app version (Settings → Tentang My Networth)
+- The app version (Settings → Tentang Finora)
 
 ## Code style
 

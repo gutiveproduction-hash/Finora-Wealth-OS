@@ -20,14 +20,14 @@ export function registerBackupHandlers() {
   ipcMain.handle("backup:exportJson", async () => {
     const win = BrowserWindow.getFocusedWindow();
     const result = await dialog.showSaveDialog(win ?? undefined!, {
-      title: "Ekspor data My Networth",
-      defaultPath: `my-networth-backup-${new Date().toISOString().slice(0, 10)}.json`,
+      title: "Ekspor data Finora",
+      defaultPath: `finora-backup-${new Date().toISOString().slice(0, 10)}.json`,
       filters: [{ name: "JSON", extensions: ["json"] }],
     });
     if (result.canceled || !result.filePath) return { ok: false };
 
     const sqlite = getRawSqlite();
-    const dump: Record<string, unknown[]> = { _meta: [{ exportedAt: new Date().toISOString(), app: "my-networth", version: 1 }] as unknown[] };
+    const dump: Record<string, unknown[]> = { _meta: [{ exportedAt: new Date().toISOString(), app: "finora", version: 1 }] as unknown[] };
     for (const table of TABLES) {
       dump[table] = sqlite.prepare(`SELECT * FROM ${table}`).all();
     }
@@ -38,7 +38,7 @@ export function registerBackupHandlers() {
   ipcMain.handle("backup:importJson", async () => {
     const win = BrowserWindow.getFocusedWindow();
     const result = await dialog.showOpenDialog(win ?? undefined!, {
-      title: "Impor data My Networth (akan menimpa data saat ini)",
+      title: "Impor data Finora (akan menimpa data saat ini)",
       filters: [{ name: "JSON", extensions: ["json"] }],
       properties: ["openFile"],
     });

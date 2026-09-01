@@ -8,15 +8,26 @@
   #root {
     height: 100%;
   }
+  :root {
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
   body {
     @apply antialiased;
   }
+  .font-mono-numbers {
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-feature-settings: "tnum" 1, "ss01" 1;
+  }
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-neutral-300 dark:bg-neutral-700 rounded-full;
+    background: rgba(160, 160, 160, 0.2);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(160, 160, 160, 0.4);
   }
   ::-webkit-scrollbar-track {
     @apply bg-transparent;
@@ -25,31 +36,33 @@
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm;
+    @apply rounded-2xl border border-neutral-200/80 dark:border-neutral-800/90 bg-white dark:bg-[#18191E] shadow-xs;
   }
   .input {
-    @apply w-full rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900
-      px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500
+    @apply w-full rounded-xl border border-neutral-200/80 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900
+      px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500
       placeholder:text-neutral-400;
   }
   .label {
     @apply block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1;
   }
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium
       transition-colors disabled:opacity-50 disabled:pointer-events-none select-none;
   }
   .btn-primary {
-    @apply btn bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800;
+    @apply btn bg-neutral-900 text-white hover:bg-neutral-800 active:bg-neutral-700
+      dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-100 shadow-xs;
   }
   .btn-secondary {
-    @apply btn bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100
-      hover:bg-neutral-200 dark:hover:bg-neutral-700;
+    @apply btn bg-neutral-100 dark:bg-neutral-800/80 text-neutral-900 dark:text-neutral-100
+      border border-neutral-200/60 dark:border-neutral-700/50
+      hover:bg-neutral-200/60 dark:hover:bg-neutral-700/60;
   }
   .btn-ghost {
-    @apply btn bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800;
+    @apply btn bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800/80;
   }
   .btn-danger {
-    @apply btn bg-red-600 text-white hover:bg-red-700;
+    @apply btn bg-rose-600 text-white hover:bg-rose-700;
   }
 }

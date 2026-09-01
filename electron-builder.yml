@@ -1,6 +1,6 @@
-appId: com.mynetworth.app
-productName: My Networth
-copyright: "Copyright © 2026 My Networth Contributors"
+appId: com.finora.app
+productName: Finora
+copyright: "Copyright © 2026 Finora Contributors"
 directories:
   buildResources: build
   output: release

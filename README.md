@@ -1,6 +1,6 @@
-# My Networth 💰
+# Finora 💰
 
-**My Networth** is a free, open-source personal finance & investment portfolio tracker. It's a
+**Finora** is a free, open-source personal finance & investment portfolio tracker. It's a
 desktop app for macOS and Windows that runs **100% offline** — your financial data never leaves
 your computer, because there is no server, no account, and no telemetry. Everything is stored in a
 local SQLite database on your own machine.
@@ -8,7 +8,7 @@ local SQLite database on your own machine.
 This project started as a small charity/community effort to give people a private, no-strings
 alternative to subscription finance apps. Contributions are welcome — see [Contributing](#contributing).
 
-> ⚠️ **Disclaimer**: My Networth is a bookkeeping tool, not financial or investment advice. Exchange
+> ⚠️ **Disclaimer**: Finora is a bookkeeping tool, not financial or investment advice. Exchange
 > rates and asset prices are entered manually (there is no live market data feed, by design — see
 > [Offline by design](#offline-by-design)). Always verify important numbers yourself.
 
@@ -31,7 +31,7 @@ alternative to subscription finance apps. Contributions are welcome — see [Con
 
 ## Offline by design
 
-My Networth deliberately has **no network calls**. There's no live stock/crypto price feed and no
+Finora deliberately has **no network calls**. There's no live stock/crypto price feed and no
 automatic exchange-rate updates — you enter and update prices and rates yourself in-app (see
 Investments → "Update Harga" and Settings → Kurs Konversi). This is a conscious trade-off: it
 means your portfolio and spending data can never be sent anywhere, at the cost of prices not
@@ -103,7 +103,7 @@ Useful scripts:
 
 ## Quick preview in a browser (no Electron)
 
-My Networth is a desktop app, but you can take a quick look at the UI in an ordinary browser tab
+Finora is a desktop app, but you can take a quick look at the UI in an ordinary browser tab
 without installing it, using sample data:
 
 ```bash
@@ -134,8 +134,8 @@ electron-builder can cross-compile Linux→Linux and, with some setup, Linux→W
 targets (.dmg) can only be built on macOS** (an Apple restriction on the packaging tools, not this
 project). The recommended way to get both installers is:
 
-- **On a Mac**: `npm install && npm run dist:mac` → produces `release/My Networth-<version>.dmg`
-- **On Windows**: `npm install && npm run dist:win` → produces `release/My Networth Setup <version>.exe`
+- **On a Mac**: `npm install && npm run dist:mac` → produces `release/Finora-<version>.dmg`
+- **On Windows**: `npm install && npm run dist:win` → produces `release/Finora Setup <version>.exe`
   (installer) and a portable `.exe`
 
 The included GitHub Actions workflow (`.github/workflows/build.yml`) does exactly this automatically
@@ -158,8 +158,8 @@ corresponding `CSC_LINK` / `CSC_KEY_PASSWORD` (mac) or `WIN_CSC_LINK` / `WIN_CSC
 
 Your data lives in a single SQLite file on your own machine:
 
-- macOS: `~/Library/Application Support/My Networth/my-networth.sqlite3`
-- Windows: `%APPDATA%\My Networth\my-networth.sqlite3`
+- macOS: `~/Library/Application Support/Finora/my-networth.sqlite3`
+- Windows: `%APPDATA%\Finora\my-networth.sqlite3`
 
 You can find the exact path any time in **Settings → Buka Lokasi File Database**, and back up your
 data anytime with **Settings → Ekspor Data (JSON)**.
@@ -181,5 +181,6 @@ Please open an issue to discuss larger changes before submitting a PR. See
 
 ## License
 
-[MIT](./LICENSE) — do whatever you like with it, including forking it for your own use case. If
-you build something useful on top of it, a link back is appreciated but not required.
+[MIT](./LICENSE) — do whatever you like with it, including forking it for your own use case.
+One requirement: see [NOTICE.md](./NOTICE.md) — the "by Gutive.co" attribution in the sidebar
+must stay visible and unmodified in any copy you distribute or deploy for others.

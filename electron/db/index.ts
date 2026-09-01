@@ -8,9 +8,9 @@ import * as schema from "./schema";
 
 /**
  * Where the sqlite file lives on disk:
- *   macOS:   ~/Library/Application Support/My Networth/my-networth.sqlite3
- *   Windows: %APPDATA%/My Networth/my-networth.sqlite3
- *   Linux:   ~/.config/My Networth/my-networth.sqlite3
+ *   macOS:   ~/Library/Application Support/Finora/my-networth.sqlite3
+ *   Windows: %APPDATA%/Finora/my-networth.sqlite3
+ *   Linux:   ~/.config/Finora/my-networth.sqlite3
  * `app.getPath("userData")` resolves all three automatically. In non-electron
  * contexts (e.g. tests) MY_NETWORTH_DB_PATH can override this.
  */

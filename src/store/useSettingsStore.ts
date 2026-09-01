@@ -8,11 +8,13 @@ interface SettingsState {
   loaded: boolean;
   theme: ThemePreference;
   baseCurrency: string;
+  isPrivate: boolean;
   rates: ExchangeRate[];
   ratesMap: Record<string, number>;
   load: () => Promise<void>;
   setTheme: (theme: ThemePreference) => Promise<void>;
   setBaseCurrency: (currency: string) => Promise<void>;
+  togglePrivacy: () => Promise<void>;
   refreshRates: () => Promise<void>;
 }
 
@@ -20,6 +22,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   loaded: false,
   theme: "system",
   baseCurrency: "IDR",
+  isPrivate: false,
   rates: [],
   ratesMap: { IDR: 1 },
 
@@ -29,6 +32,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       loaded: true,
       theme: (settings.theme as ThemePreference) ?? "system",
       baseCurrency: settings.baseCurrency ?? "IDR",
+      isPrivate: settings.isPrivate === "true",
       rates,
       ratesMap: ratesToMap(rates),
     });
@@ -42,6 +46,12 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   setBaseCurrency: async (currency) => {
     set({ baseCurrency: currency });
     await window.api.settings.set("baseCurrency", currency);
+  },
+
+  togglePrivacy: async () => {
+    const next = !get().isPrivate;
+    set({ isPrivate: next });
+    await window.api.settings.set("isPrivate", String(next));
   },
 
   refreshRates: async () => {
