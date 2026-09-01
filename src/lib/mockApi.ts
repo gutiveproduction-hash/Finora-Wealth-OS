@@ -622,6 +622,8 @@ export function createMockApi(): MyNetworthApi {
     app: {
       getVersion: () => ok("0.1.0 (pratinjau browser)"),
     },
+    // Not a real OS platform — there are no native traffic-light buttons to clear in a browser tab.
+    platform: "browser",
   };
 }
 

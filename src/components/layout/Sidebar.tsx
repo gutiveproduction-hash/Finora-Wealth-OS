@@ -68,9 +68,13 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 export function Sidebar() {
   const navigate = useNavigate();
 
+  // On macOS the window uses an inset title bar (traffic-light buttons drawn over the
+  // content area) — push the logo down so it doesn't sit flush against them.
+  const isMacElectron = typeof window !== "undefined" && window.api?.platform === "darwin";
+
   return (
     <aside className="w-64 shrink-0 border-r border-neutral-200/70 dark:border-neutral-800/80 flex flex-col h-full bg-white dark:bg-[#18191E]">
-      <div className="px-5 py-5 flex items-center gap-3">
+      <div className={clsx("px-5 pb-5 flex items-center gap-3", isMacElectron ? "pt-10" : "pt-5")}>
         <div className="w-8 h-8 rounded-lg bg-neutral-900 dark:bg-white flex items-center justify-center text-white dark:text-neutral-950 shadow-sm shrink-0">
           <Layers className="w-4 h-4" />
         </div>

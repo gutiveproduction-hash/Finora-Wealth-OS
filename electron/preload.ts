@@ -80,6 +80,9 @@ const api = {
   app: {
     getVersion: () => ipcRenderer.invoke("app:getVersion"),
   },
+  /** Renderer has no direct Node access, so the OS platform is exposed as a plain
+   * value here — used to add clearance under macOS's inset traffic-light buttons. */
+  platform: process.platform,
 };
 
 contextBridge.exposeInMainWorld("api", api);

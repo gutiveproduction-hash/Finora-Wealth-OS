@@ -207,6 +207,8 @@ export interface MyNetworthApi {
   app: {
     getVersion: () => Promise<string>;
   };
+  /** Real OS platform ("darwin"/"win32"/"linux") in Electron, or "browser" in the preview fallback. */
+  platform: string;
 }
 
 declare global {
