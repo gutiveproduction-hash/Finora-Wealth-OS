@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 import type { FinancialGoal } from "@/hooks/useGoal";
 
 export function GoalModal({
@@ -7,11 +8,13 @@ export function GoalModal({
   onClose,
   goal,
   onSave,
+  currency,
 }: {
   open: boolean;
   onClose: () => void;
   goal: FinancialGoal;
   onSave: (goal: FinancialGoal) => void;
+  currency: string;
 }) {
   const [title, setTitle] = useState(goal.title);
   const [targetAmount, setTargetAmount] = useState(String(goal.targetAmount));
@@ -32,13 +35,7 @@ export function GoalModal({
         </div>
         <div>
           <label className="label">Nominal Target</label>
-          <input
-            className="input"
-            type="number"
-            min={0}
-            value={targetAmount}
-            onChange={(e) => setTargetAmount(e.target.value)}
-          />
+          <CurrencyInput currency={currency} value={targetAmount} onChange={setTargetAmount} />
         </div>
         <div className="flex items-center justify-end gap-2 pt-2">
           <button type="button" className="btn-secondary" onClick={onClose}>

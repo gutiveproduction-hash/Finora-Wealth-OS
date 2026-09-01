@@ -4,9 +4,27 @@ import { useBudgets } from "@/hooks/useBudgets";
 import { useCategories } from "@/hooks/useCategories";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { BudgetProgressBar } from "@/components/charts/BudgetProgressBar";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 import { formatCurrency, formatMonthLabel, currentMonth } from "@/lib/format";
 import { colorForIndex } from "@/lib/chartColors";
 import { useSettingsStore } from "@/store/useSettingsStore";
+
+/** Local-state wrapper so the per-category budget field can use CurrencyInput's
+ * controlled value/onChange while still only committing on blur. */
+function BudgetAmountInput({ initial, onCommit }: { initial: number | ""; onCommit: (value: number) => void }) {
+  const [value, setValue] = useState(initial === "" ? "" : String(initial));
+
+  return (
+    <CurrencyInput
+      className="input !py-1.5 text-sm"
+      currency="IDR"
+      placeholder="Anggaran"
+      value={value}
+      onChange={setValue}
+      onBlur={() => onCommit(Number(value) || 0)}
+    />
+  );
+}
 
 function shiftMonth(month: string, delta: number): string {
   const [y, m] = month.split("-").map(Number);
@@ -56,13 +74,10 @@ export default function Budgets() {
                   <BudgetProgressBar label={c.name} spent={spent} budget={budget?.amount ?? 0} currency={c.type === "expense" ? "IDR" : "IDR"} color={colorForIndex(i)} />
                 </div>
                 <div className="w-36">
-                  <input
-                    className="input !py-1.5 text-sm"
-                    type="number"
-                    placeholder="Anggaran"
-                    defaultValue={budget?.amount ?? ""}
-                    onBlur={(e) => {
-                      const value = Number(e.target.value) || 0;
+                  <BudgetAmountInput
+                    key={`${c.id}-${month}`}
+                    initial={budget?.amount ?? ""}
+                    onCommit={(value) => {
                       if (value > 0) setBudget(c.id, value);
                       else if (budget) deleteBudget(budget.id);
                     }}

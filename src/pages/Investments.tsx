@@ -7,6 +7,7 @@ import { Modal } from "@/components/ui/Modal";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { StatCard } from "@/components/ui/StatCard";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 import { formatCurrency, formatNumber, formatPercent, todayIso } from "@/lib/format";
 import { ASSET_TYPE_LABELS } from "@/lib/chartColors";
 import { COMMON_CURRENCIES } from "@/lib/currency";
@@ -281,12 +282,10 @@ export default function Investments() {
             </div>
             <div>
               <label className="label">Harga Saat Ini</label>
-              <input
-                className="input"
-                type="number"
-                step="any"
+              <CurrencyInput
+                currency={assetForm.currency}
                 value={assetForm.currentPrice}
-                onChange={(e) => setAssetForm((f) => ({ ...f, currentPrice: e.target.value }))}
+                onChange={(v) => setAssetForm((f) => ({ ...f, currentPrice: v }))}
               />
             </div>
           </div>
@@ -331,12 +330,10 @@ export default function Investments() {
             </div>
             <div>
               <label className="label">Harga Beli / Unit</label>
-              <input
-                className="input"
-                type="number"
-                step="any"
+              <CurrencyInput
+                currency={holdingForm.currency}
                 value={holdingForm.avgBuyPrice}
-                onChange={(e) => setHoldingForm((f) => ({ ...f, avgBuyPrice: e.target.value }))}
+                onChange={(v) => setHoldingForm((f) => ({ ...f, avgBuyPrice: v }))}
                 required
               />
             </div>
@@ -414,7 +411,7 @@ export default function Investments() {
         <form onSubmit={handlePriceSubmit} className="space-y-4">
           <div>
             <label className="label">Harga Terbaru</label>
-            <input className="input" type="number" step="any" value={priceInput} onChange={(e) => setPriceInput(e.target.value)} required />
+            <CurrencyInput currency={priceModalAsset?.currency ?? "IDR"} value={priceInput} onChange={setPriceInput} required />
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" className="btn-secondary" onClick={() => setPriceModalAsset(null)}>

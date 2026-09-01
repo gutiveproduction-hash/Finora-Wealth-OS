@@ -4,6 +4,7 @@ import { useAccounts } from "@/hooks/useAccounts";
 import { Modal } from "@/components/ui/Modal";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 import { formatCurrency } from "@/lib/format";
 import { ACCOUNT_TYPE_LABELS } from "@/lib/chartColors";
 import { COMMON_CURRENCIES } from "@/lib/currency";
@@ -169,12 +170,10 @@ export default function Accounts() {
           </div>
           <div>
             <label className="label">Saldo Awal</label>
-            <input
-              className="input"
-              type="number"
-              step="any"
+            <CurrencyInput
+              currency={form.currency}
               value={form.initialBalance}
-              onChange={(e) => setForm((f) => ({ ...f, initialBalance: e.target.value }))}
+              onChange={(v) => setForm((f) => ({ ...f, initialBalance: v }))}
             />
             <p className="text-xs text-neutral-400 mt-1">
               Saldo saat ini = saldo awal ± transaksi yang tercatat.

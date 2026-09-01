@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { StatCard } from "@/components/ui/StatCard";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { LIABILITY_TYPE_LABELS } from "@/lib/chartColors";
 import { COMMON_CURRENCIES } from "@/lib/currency";
@@ -143,7 +144,7 @@ export default function Liabilities() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="label">Sisa Saldo</label>
-              <input className="input" type="number" step="any" value={form.balance} onChange={(e) => setForm((f) => ({ ...f, balance: e.target.value }))} />
+              <CurrencyInput currency={form.currency} value={form.balance} onChange={(v) => setForm((f) => ({ ...f, balance: v }))} />
             </div>
             <div>
               <label className="label">Bunga (% / tahun)</label>

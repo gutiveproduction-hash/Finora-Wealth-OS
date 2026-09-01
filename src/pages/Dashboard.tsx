@@ -155,7 +155,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <GoalModal open={isGoalModalOpen} onClose={() => setIsGoalModalOpen(false)} goal={goal} onSave={setGoal} />
+      <GoalModal open={isGoalModalOpen} onClose={() => setIsGoalModalOpen(false)} goal={goal} onSave={setGoal} currency={baseCurrency} />
     </div>
   );
 }

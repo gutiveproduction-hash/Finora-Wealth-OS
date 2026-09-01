@@ -7,6 +7,7 @@ import { Modal } from "@/components/ui/Modal";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ImportCsvModal } from "@/components/ImportCsvModal";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 import { formatCurrency, formatDate, todayIso } from "@/lib/format";
 import type { Transaction, TransactionType } from "@/types";
 
@@ -269,13 +270,10 @@ export default function Transactions() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="label">Jumlah</label>
-              <input
-                className="input"
-                type="number"
-                step="any"
-                min="0"
+              <CurrencyInput
+                currency={accountMap.get(form.accountId)?.currency ?? "IDR"}
                 value={form.amount}
-                onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
+                onChange={(v) => setForm((f) => ({ ...f, amount: v }))}
                 required
               />
             </div>
