@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import type { NetWorthSnapshot } from "@/types";
-import { formatDate } from "@/lib/format";
+import { formatDate, todayIso } from "@/lib/format";
 import { AnimatedNumber, AnimatedPercent } from "@/components/ui/AnimatedCounter";
 
 type Timeframe = "1M" | "3M" | "6M" | "1Y" | "ALL";
@@ -29,10 +29,27 @@ export function GrowthChart({
   const [timeframe, setTimeframe] = useState<Timeframe>("1Y");
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
+  // The chart should always render something — if there's no recorded history yet,
+  // fall back to a single point for today's current net worth rather than an empty state.
+  const effectiveSnapshots = useMemo<NetWorthSnapshot[]>(() => {
+    if (snapshots.length > 0) return snapshots;
+    return [
+      {
+        id: "current",
+        date: todayIso(),
+        totalAssets: currentNetWorth,
+        totalLiabilities: 0,
+        netWorth: currentNetWorth,
+        baseCurrency: currency,
+        createdAt: todayIso(),
+      },
+    ];
+  }, [snapshots, currentNetWorth, currency]);
+
   const filteredData = useMemo(() => {
     const count = TIMEFRAME_COUNT[timeframe];
-    return snapshots.slice(-count);
-  }, [snapshots, timeframe]);
+    return effectiveSnapshots.slice(-count);
+  }, [effectiveSnapshots, timeframe]);
 
   const points = useMemo(() => {
     if (filteredData.length === 0) return [];
@@ -117,74 +134,68 @@ export function GrowthChart({
         </div>
       </div>
 
-      {filteredData.length === 0 ? (
-        <div className="h-48 sm:h-56 flex items-center justify-center text-sm text-neutral-400 text-center px-4">
-          Belum ada data historis. Catat snapshot kekayaan bersih untuk mulai melacak tren.
-        </div>
-      ) : (
-        <div className="w-full overflow-hidden relative select-none">
-          <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full h-48 sm:h-56 overflow-visible" onMouseLeave={() => setHoverIndex(null)}>
-            <defs>
-              <linearGradient id="netWorthAreaGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#0D9488" stopOpacity="0.28" />
-                <stop offset="100%" stopColor="#0D9488" stopOpacity="0" />
-              </linearGradient>
-            </defs>
+      <div className="w-full overflow-hidden relative select-none">
+        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full h-48 sm:h-56 overflow-visible" onMouseLeave={() => setHoverIndex(null)}>
+          <defs>
+            <linearGradient id="netWorthAreaGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#0D9488" stopOpacity="0.28" />
+              <stop offset="100%" stopColor="#0D9488" stopOpacity="0" />
+            </linearGradient>
+          </defs>
 
-            <line x1={PAD_X} y1={PAD_Y} x2={WIDTH - PAD_X} y2={PAD_Y} stroke="currentColor" className="text-neutral-200/50 dark:text-neutral-800/40" strokeDasharray="3 3" />
-            <line x1={PAD_X} y1={HEIGHT / 2} x2={WIDTH - PAD_X} y2={HEIGHT / 2} stroke="currentColor" className="text-neutral-200/50 dark:text-neutral-800/40" strokeDasharray="3 3" />
-            <line x1={PAD_X} y1={HEIGHT - PAD_Y} x2={WIDTH - PAD_X} y2={HEIGHT - PAD_Y} stroke="currentColor" className="text-neutral-200/50 dark:text-neutral-800/40" strokeDasharray="3 3" />
+          <line x1={PAD_X} y1={PAD_Y} x2={WIDTH - PAD_X} y2={PAD_Y} stroke="currentColor" className="text-neutral-200/50 dark:text-neutral-800/40" strokeDasharray="3 3" />
+          <line x1={PAD_X} y1={HEIGHT / 2} x2={WIDTH - PAD_X} y2={HEIGHT / 2} stroke="currentColor" className="text-neutral-200/50 dark:text-neutral-800/40" strokeDasharray="3 3" />
+          <line x1={PAD_X} y1={HEIGHT - PAD_Y} x2={WIDTH - PAD_X} y2={HEIGHT - PAD_Y} stroke="currentColor" className="text-neutral-200/50 dark:text-neutral-800/40" strokeDasharray="3 3" />
 
-            <motion.path key={`area-${timeframe}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} d={areaPath} fill="url(#netWorthAreaGradient)" />
+          <motion.path key={`area-${timeframe}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} d={areaPath} fill="url(#netWorthAreaGradient)" />
 
-            <motion.path
-              key={`line-${timeframe}`}
-              initial={{ pathLength: 0, opacity: 0.6 }}
-              animate={{ pathLength: 1, opacity: 1 }}
-              transition={{ duration: 0.85, ease: "easeOut" }}
-              d={linePath}
-              fill="none"
-              stroke="#0D9488"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+          <motion.path
+            key={`line-${timeframe}`}
+            initial={{ pathLength: 0, opacity: 0.6 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 0.85, ease: "easeOut" }}
+            d={linePath}
+            fill="none"
+            stroke="#0D9488"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {points.length > 0 && (
+            <g>
+              <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="10" className="fill-teal-500/20 dark:fill-teal-400/20 animate-ping" />
+              <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="4.5" className="fill-teal-600 dark:fill-teal-400 stroke-white dark:stroke-neutral-900" strokeWidth="2" />
+            </g>
+          )}
+
+          {activePoint && hoverIndex !== null && (
+            <g>
+              <line x1={activePoint.x} y1={PAD_Y} x2={activePoint.x} y2={HEIGHT - PAD_Y} stroke="currentColor" className="text-neutral-400 dark:text-neutral-500" strokeWidth="1" strokeDasharray="2 2" />
+              <circle cx={activePoint.x} cy={activePoint.y} r="6" className="fill-teal-600 dark:fill-teal-400 stroke-white dark:stroke-neutral-900" strokeWidth="2.5" />
+            </g>
+          )}
+
+          {points.map((pt, idx) => (
+            <rect
+              key={idx}
+              x={idx === 0 ? pt.x : (points[idx - 1].x + pt.x) / 2}
+              y={0}
+              width={idx === points.length - 1 ? WIDTH - pt.x : points[idx + 1].x - pt.x}
+              height={HEIGHT}
+              fill="transparent"
+              className="cursor-crosshair"
+              onMouseEnter={() => setHoverIndex(idx)}
             />
+          ))}
+        </svg>
 
-            {points.length > 0 && (
-              <g>
-                <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="10" className="fill-teal-500/20 dark:fill-teal-400/20 animate-ping" />
-                <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="4.5" className="fill-teal-600 dark:fill-teal-400 stroke-white dark:stroke-neutral-900" strokeWidth="2" />
-              </g>
-            )}
-
-            {activePoint && hoverIndex !== null && (
-              <g>
-                <line x1={activePoint.x} y1={PAD_Y} x2={activePoint.x} y2={HEIGHT - PAD_Y} stroke="currentColor" className="text-neutral-400 dark:text-neutral-500" strokeWidth="1" strokeDasharray="2 2" />
-                <circle cx={activePoint.x} cy={activePoint.y} r="6" className="fill-teal-600 dark:fill-teal-400 stroke-white dark:stroke-neutral-900" strokeWidth="2.5" />
-              </g>
-            )}
-
-            {points.map((pt, idx) => (
-              <rect
-                key={idx}
-                x={idx === 0 ? pt.x : (points[idx - 1].x + pt.x) / 2}
-                y={0}
-                width={idx === points.length - 1 ? WIDTH - pt.x : points[idx + 1].x - pt.x}
-                height={HEIGHT}
-                fill="transparent"
-                className="cursor-crosshair"
-                onMouseEnter={() => setHoverIndex(idx)}
-              />
-            ))}
-          </svg>
-
-          <div className="flex justify-between items-center text-[11px] text-neutral-400 dark:text-neutral-500 mt-2 px-2 font-mono-numbers">
-            <span>{filteredData[0] ? formatDate(filteredData[0].date) : ""}</span>
-            <span>{filteredData[Math.floor(filteredData.length / 2)] ? formatDate(filteredData[Math.floor(filteredData.length / 2)].date) : ""}</span>
-            <span>{filteredData[filteredData.length - 1] ? formatDate(filteredData[filteredData.length - 1].date) : ""}</span>
-          </div>
+        <div className="flex justify-between items-center text-[11px] text-neutral-400 dark:text-neutral-500 mt-2 px-2 font-mono-numbers">
+          <span>{filteredData[0] ? formatDate(filteredData[0].date) : ""}</span>
+          <span>{filteredData[Math.floor(filteredData.length / 2)] ? formatDate(filteredData[Math.floor(filteredData.length / 2)].date) : ""}</span>
+          <span>{filteredData[filteredData.length - 1] ? formatDate(filteredData[filteredData.length - 1].date) : ""}</span>
         </div>
-      )}
+      </div>
     </motion.div>
   );
 }
