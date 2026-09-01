@@ -11,10 +11,6 @@ files:
 asarUnpack:
   - "**/*.node"
 npmRebuild: true
-# Releases are published manually (see CONTRIBUTING.md) by uploading the built
-# installers to a GitHub Release — never let electron-builder auto-publish on its
-# own, since CI's GITHUB_TOKEN doesn't have release-write permission anyway.
-publish: never
 
 mac:
   category: public.app-category.finance
