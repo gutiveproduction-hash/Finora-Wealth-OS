@@ -1,0 +1,18 @@
+node_modules/
+dist/
+dist-electron/
+release/
+*.log
+.DS_Store
+Thumbs.db
+.env
+.env.local
+
+# app runtime data (per-user sqlite db, only relevant if generated inside repo during dev)
+electron/db/dev.sqlite3
+*.sqlite3-journal
+
+# editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
