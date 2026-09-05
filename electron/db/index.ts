@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS assets (
   currency TEXT NOT NULL DEFAULT 'IDR',
   current_price REAL NOT NULL DEFAULT 0,
   notes TEXT NOT NULL DEFAULT '',
+  exclude_from_balance INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
@@ -141,6 +142,13 @@ CREATE TABLE IF NOT EXISTS exchange_rates (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS exchange_rates_currency_unique ON exchange_rates(currency);
 `;
+
+function runMigrations(sqliteDb: Database.Database) {
+  const assetCols = sqliteDb.prepare("PRAGMA table_info(assets)").all() as { name: string }[];
+  if (!assetCols.some((c) => c.name === "exclude_from_balance")) {
+    sqliteDb.exec("ALTER TABLE assets ADD COLUMN exclude_from_balance INTEGER NOT NULL DEFAULT 0");
+  }
+}
 
 function seedDefaults(sqliteDb: Database.Database) {
   const now = new Date().toISOString();
@@ -209,6 +217,7 @@ export function getDb() {
   sqlite.pragma("journal_mode = WAL");
   sqlite.pragma("foreign_keys = ON");
   sqlite.exec(SCHEMA_SQL);
+  runMigrations(sqlite);
   seedDefaults(sqlite);
   dbInstance = drizzle(sqlite, { schema });
   return dbInstance;

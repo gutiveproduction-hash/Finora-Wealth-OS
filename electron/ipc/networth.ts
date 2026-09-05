@@ -35,7 +35,8 @@ export function computeNetWorthSummary(): NetWorthSummary {
   const holdingRows = sqlite
     .prepare(
       `SELECT h.quantity as quantity, a.current_price as currentPrice, a.currency as currency
-       FROM holdings h JOIN assets a ON a.id = h.asset_id`
+       FROM holdings h JOIN assets a ON a.id = h.asset_id
+       WHERE a.exclude_from_balance = 0`
     )
     .all() as Array<{ quantity: number; currentPrice: number; currency: string }>;
   let investmentsTotal = 0;

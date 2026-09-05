@@ -17,7 +17,15 @@ import type { Asset, AssetType } from "@/types";
 
 const ASSET_TYPES: AssetType[] = ["stock", "mutual_fund", "crypto", "bond", "property", "other"];
 
-const emptyAssetForm = { name: "", symbol: "", type: "stock" as AssetType, currency: "IDR", currentPrice: "0", notes: "" };
+const emptyAssetForm = {
+  name: "",
+  symbol: "",
+  type: "stock" as AssetType,
+  currency: "IDR",
+  currentPrice: "0",
+  notes: "",
+  excludeFromBalance: false,
+};
 const emptyHoldingForm = {
   accountId: "",
   quantity: "",
@@ -70,6 +78,7 @@ export default function Investments() {
       currency: asset.currency,
       currentPrice: String(asset.currentPrice),
       notes: asset.notes,
+      excludeFromBalance: asset.excludeFromBalance,
     });
     setAssetModalOpen(true);
   }
@@ -83,6 +92,7 @@ export default function Investments() {
       currency: assetForm.currency,
       currentPrice: Number(assetForm.currentPrice) || 0,
       notes: assetForm.notes,
+      excludeFromBalance: assetForm.excludeFromBalance,
     };
     if (!payload.name) return;
     if (editingAsset) {
@@ -173,7 +183,14 @@ export default function Investments() {
                   <div className="text-xs uppercase tracking-wide text-neutral-400">
                     {ASSET_TYPE_LABELS[asset.type]} {asset.symbol && `· ${asset.symbol}`}
                   </div>
-                  <div className="font-medium text-lg">{asset.name}</div>
+                  <div className="font-medium text-lg flex items-center gap-2">
+                    {asset.name}
+                    {asset.excludeFromBalance && (
+                      <span className="text-[10px] font-normal uppercase tracking-wide px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-500">
+                        Tidak mengurangi saldo
+                      </span>
+                    )}
+                  </div>
                   <div className="text-sm text-neutral-500 mt-1">
                     {formatNumber(asset.totalQty, 4)} unit @ {formatCurrency(asset.currentPrice, asset.currency)}
                   </div>
@@ -298,6 +315,20 @@ export default function Investments() {
               onChange={(e) => setAssetForm((f) => ({ ...f, notes: e.target.value }))}
             />
           </div>
+          <div>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={assetForm.excludeFromBalance}
+                onChange={(e) => setAssetForm((f) => ({ ...f, excludeFromBalance: e.target.checked }))}
+              />
+              Tidak mengurangi saldo saat ini
+            </label>
+            <p className="text-xs text-neutral-400 mt-1">
+              Aktifkan jika aset ini (mis. properti atau aset yang sudah dimiliki) tidak dibeli menggunakan salah satu
+              akun yang tercatat di aplikasi.
+            </p>
+          </div>
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" className="btn-secondary" onClick={() => setAssetModalOpen(false)}>
               Batal
@@ -353,48 +384,56 @@ export default function Investments() {
               ))}
             </select>
           </div>
-          {holdingForm.accountId && (
-            <>
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={holdingForm.recordFundingTransaction}
-                  onChange={(e) => setHoldingForm((f) => ({ ...f, recordFundingTransaction: e.target.checked }))}
-                />
-                Catat juga sebagai pengeluaran di akun tersebut
-              </label>
-              {holdingForm.recordFundingTransaction && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="label">Kategori Pengeluaran</label>
-                    <select
-                      className="input"
-                      value={holdingForm.fundingCategoryId}
-                      onChange={(e) => setHoldingForm((f) => ({ ...f, fundingCategoryId: e.target.value }))}
-                    >
-                      <option value="">Tanpa kategori</option>
-                      {categories
-                        .filter((c) => c.type === "expense")
-                        .map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.name}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="label">Tanggal</label>
-                    <input
-                      className="input"
-                      type="date"
-                      value={holdingForm.date}
-                      onChange={(e) => setHoldingForm((f) => ({ ...f, date: e.target.value }))}
-                    />
-                  </div>
+          <div>
+            <label
+              className={`flex items-center gap-2 text-sm ${
+                !holdingForm.accountId ? "text-neutral-400 dark:text-neutral-600" : ""
+              }`}
+            >
+              <input
+                type="checkbox"
+                disabled={!holdingForm.accountId}
+                checked={!!holdingForm.accountId && holdingForm.recordFundingTransaction}
+                onChange={(e) => setHoldingForm((f) => ({ ...f, recordFundingTransaction: e.target.checked }))}
+              />
+              Catat juga sebagai pengeluaran di akun tersebut
+            </label>
+            {!holdingForm.accountId && (
+              <p className="text-xs text-neutral-400 mt-1">
+                Pilih akun sumber dana dulu kalau mau mencatat pembelian ini sebagai pengeluaran.
+              </p>
+            )}
+            {holdingForm.accountId && holdingForm.recordFundingTransaction && (
+              <div className="grid grid-cols-2 gap-4 mt-3">
+                <div>
+                  <label className="label">Kategori Pengeluaran</label>
+                  <select
+                    className="input"
+                    value={holdingForm.fundingCategoryId}
+                    onChange={(e) => setHoldingForm((f) => ({ ...f, fundingCategoryId: e.target.value }))}
+                  >
+                    <option value="">Tanpa kategori</option>
+                    {categories
+                      .filter((c) => c.type === "expense")
+                      .map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                  </select>
                 </div>
-              )}
-            </>
-          )}
+                <div>
+                  <label className="label">Tanggal</label>
+                  <input
+                    className="input"
+                    type="date"
+                    value={holdingForm.date}
+                    onChange={(e) => setHoldingForm((f) => ({ ...f, date: e.target.value }))}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" className="btn-secondary" onClick={() => setHoldingModalOpen(false)}>
               Batal

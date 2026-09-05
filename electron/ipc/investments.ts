@@ -34,6 +34,7 @@ export function registerInvestmentHandlers() {
         currency: string;
         currentPrice: number;
         notes?: string;
+        excludeFromBalance?: boolean;
       }
     ) => {
       const db = getDb();
@@ -46,6 +47,7 @@ export function registerInvestmentHandlers() {
         currency: input.currency || "IDR",
         currentPrice: input.currentPrice ?? 0,
         notes: input.notes ?? "",
+        excludeFromBalance: input.excludeFromBalance ?? false,
         createdAt: now,
         updatedAt: now,
       };

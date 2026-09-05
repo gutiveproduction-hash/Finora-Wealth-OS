@@ -67,6 +67,7 @@ export interface Asset {
   currency: string;
   currentPrice: number;
   notes: string;
+  excludeFromBalance: boolean;
   createdAt: string;
   updatedAt: string;
   totalQty: number;

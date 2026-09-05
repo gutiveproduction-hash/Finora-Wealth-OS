@@ -78,6 +78,7 @@ export const assets = sqliteTable("assets", {
   currency: text("currency").notNull().default("IDR"),
   currentPrice: real("current_price").notNull().default(0),
   notes: text("notes").notNull().default(""),
+  excludeFromBalance: integer("exclude_from_balance", { mode: "boolean" }).notNull().default(false),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });

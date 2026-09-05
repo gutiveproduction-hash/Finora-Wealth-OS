@@ -136,8 +136,8 @@ function seedStore(): Store {
     transactions,
     budgets,
     assets: [
-      { id: assetBbca, name: "Bank Central Asia", symbol: "BBCA", type: "stock", currency: "IDR", currentPrice: 10200, notes: "", createdAt: now, updatedAt: now },
-      { id: assetBtc, name: "Bitcoin", symbol: "BTC", type: "crypto", currency: "USD", currentPrice: 62000, notes: "", createdAt: now, updatedAt: now },
+      { id: assetBbca, name: "Bank Central Asia", symbol: "BBCA", type: "stock", currency: "IDR", currentPrice: 10200, notes: "", excludeFromBalance: false, createdAt: now, updatedAt: now },
+      { id: assetBtc, name: "Bitcoin", symbol: "BTC", type: "crypto", currency: "USD", currentPrice: 62000, notes: "", excludeFromBalance: false, createdAt: now, updatedAt: now },
     ],
     holdings: [
       { id: uuid(), assetId: assetBbca, accountId: accBca, quantity: 500, avgBuyPrice: 9200, currency: "IDR", createdAt: now },
@@ -232,7 +232,9 @@ function computeNetWorthSummary(): NetWorthSummary {
   const cashTotal = store.accounts
     .filter((a) => !a.archived)
     .reduce((s, a) => s + toBase(computeAccountBalance(a.id), a.currency), 0);
-  const investmentsTotal = withAssetAggregates().reduce((s, a) => s + toBase(a.marketValue, a.currency), 0);
+  const investmentsTotal = withAssetAggregates()
+    .filter((a) => !a.excludeFromBalance)
+    .reduce((s, a) => s + toBase(a.marketValue, a.currency), 0);
   const liabilitiesTotal = store.liabilities.reduce((s, l) => s + toBase(l.balance, l.currency), 0);
   const totalAssets = cashTotal + investmentsTotal;
   return {
@@ -417,6 +419,7 @@ export function createMockApi(): MyNetworthApi {
           currency: input.currency ?? "IDR",
           currentPrice: input.currentPrice ?? 0,
           notes: input.notes ?? "",
+          excludeFromBalance: input.excludeFromBalance ?? false,
           createdAt: now,
           updatedAt: now,
         };
