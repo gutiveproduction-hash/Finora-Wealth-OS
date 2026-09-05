@@ -1,12 +1,16 @@
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import type { NetWorthSnapshot } from "@/types";
-import { formatDate, todayIso } from "@/lib/format";
+import { formatDate, todayIso, toLocalIso } from "@/lib/format";
 import { AnimatedNumber, AnimatedPercent } from "@/components/ui/AnimatedCounter";
 
 type Timeframe = "1M" | "3M" | "6M" | "1Y" | "ALL";
 const TIMEFRAMES: Timeframe[] = ["1M", "3M", "6M", "1Y", "ALL"];
-const TIMEFRAME_COUNT: Record<Timeframe, number> = { "1M": 2, "3M": 4, "6M": 7, "1Y": 12, ALL: Infinity };
+/** Panjang jendela waktu tiap timeframe, dalam bulan. Sebelumnya nilai-nilai ini dipakai
+ * sebagai JUMLAH snapshot ("1M" = 2 snapshot terakhir), padahal snapshot dicatat manual —
+ * jadi "1M" bisa menampilkan data dua tahun lalu dan "1Y" memotong riwayat yang masih
+ * dalam setahun. Sekarang difilter berdasarkan tanggal sungguhan. */
+const TIMEFRAME_MONTHS: Record<Timeframe, number> = { "1M": 1, "3M": 3, "6M": 6, "1Y": 12, ALL: Infinity };
 
 const WIDTH = 800;
 const HEIGHT = 240;
@@ -47,8 +51,14 @@ export function GrowthChart({
   }, [snapshots, currentNetWorth, currency]);
 
   const filteredData = useMemo(() => {
-    const count = TIMEFRAME_COUNT[timeframe];
-    return effectiveSnapshots.slice(-count);
+    const months = TIMEFRAME_MONTHS[timeframe];
+    if (!Number.isFinite(months)) return effectiveSnapshots;
+    const now = new Date();
+    const lastDay = new Date(now.getFullYear(), now.getMonth() - months + 1, 0).getDate();
+    const cutoff = toLocalIso(new Date(now.getFullYear(), now.getMonth() - months, Math.min(now.getDate(), lastDay)));
+    const inRange = effectiveSnapshots.filter((s) => s.date >= cutoff);
+    // Selalu sisakan minimal dua titik supaya grafik tidak jadi satu titik kosong.
+    return inRange.length >= 2 ? inRange : effectiveSnapshots.slice(-2);
   }, [effectiveSnapshots, timeframe]);
 
   const points = useMemo(() => {

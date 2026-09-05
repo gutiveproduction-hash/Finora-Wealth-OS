@@ -11,6 +11,7 @@ export function QuickStatCard({
   changePct,
   isPrivate,
   invertTone = false,
+  changeLabel = "vs bulan lalu",
 }: {
   label: string;
   value: string;
@@ -21,6 +22,8 @@ export function QuickStatCard({
   isPrivate?: boolean;
   /** For metrics where going up is bad (e.g. spending) — flips which direction renders green. */
   invertTone?: boolean;
+  /** What `changePct` is measured against — most cards compare to last month, but not all. */
+  changeLabel?: string;
 }) {
   const hasChange = changePct !== undefined && Number.isFinite(changePct);
   const isUp = (changePct ?? 0) >= 0;
@@ -44,7 +47,7 @@ export function QuickStatCard({
       {hasChange && !isPrivate && (
         <span className={`inline-flex items-center gap-0.5 text-[11px] font-semibold ${isGood ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
           {isUp ? <ArrowUpRight size={11} /> : <ArrowDownRight size={11} />}
-          {Math.abs(changePct!).toFixed(1)}% vs bulan lalu
+          {Math.abs(changePct!).toFixed(1)}% {changeLabel}
         </span>
       )}
     </motion.div>

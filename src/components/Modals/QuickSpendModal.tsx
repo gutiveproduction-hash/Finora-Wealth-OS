@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { CurrencyInput } from "@/components/ui/CurrencyInput";
 import { todayIso } from "@/lib/format";
@@ -25,6 +25,16 @@ export function QuickSpendModal({
 
   const currency = accounts.find((a) => a.id === accountId)?.currency ?? "IDR";
 
+  // Akun & kategori dimuat async, jadi state awal bisa "" sementara <select> menampilkan
+  // opsi pertama. Tanpa sinkronisasi ini, memilih opsi yang sudah tampil tidak memicu
+  // onChange dan transaksi tersimpan tanpa kategori.
+  useEffect(() => {
+    if (!open) return;
+    if (!accounts.some((a) => a.id === accountId)) setAccountId(accounts[0]?.id ?? "");
+    if (!expenseCategories.some((c) => c.id === categoryId)) setCategoryId(expenseCategories[0]?.id ?? "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, accounts, categories]);
+
   function reset() {
     setAmount("");
     setNote("");
@@ -44,7 +54,7 @@ export function QuickSpendModal({
       >
         <div>
           <label className="label">Nominal</label>
-          <CurrencyInput currency={currency} value={amount} onChange={setAmount} autoFocus />
+          <CurrencyInput currency={currency} value={amount} onChange={setAmount} autoFocus required />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>

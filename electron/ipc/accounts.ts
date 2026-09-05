@@ -24,9 +24,12 @@ export function computeAccountBalance(accountId: string): number {
     )
     .get(accountId) as { total: number };
 
+  // Sisi penerima transfer memakai transfer_amount (mata uang akun tujuan) bila ada,
+  // supaya transfer lintas mata uang tidak menambahkan angka mentah mata uang lain.
   const incoming = sqlite
     .prepare(
-      `SELECT COALESCE(SUM(amount), 0) as total FROM transactions
+      `SELECT COALESCE(SUM(CASE WHEN type = 'transfer' THEN COALESCE(transfer_amount, amount) ELSE amount END), 0) as total
+       FROM transactions
        WHERE (account_id = ? AND type = 'income')
           OR (transfer_account_id = ? AND type = 'transfer')`
     )

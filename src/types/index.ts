@@ -33,6 +33,9 @@ export interface Transaction {
   categoryId: string | null;
   type: TransactionType;
   transferAccountId: string | null;
+  /** Jumlah yang diterima akun tujuan (mata uang akun tujuan) untuk transfer lintas
+   * mata uang; null kalau mata uangnya sama. */
+  transferAmount: number | null;
   amount: number;
   currency: string;
   date: string;
@@ -201,7 +204,7 @@ export interface MyNetworthApi {
   };
   backup: {
     exportJson: () => Promise<{ ok: boolean; filePath?: string }>;
-    importJson: () => Promise<{ ok: boolean }>;
+    importJson: () => Promise<{ ok: boolean; reason?: string }>;
     revealDbFile: () => Promise<boolean>;
     dbPath: () => Promise<string>;
   };

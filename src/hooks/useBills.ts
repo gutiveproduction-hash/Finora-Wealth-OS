@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { toLocalIso } from "@/lib/format";
 
 export type BillCategory = "rutin" | "kartu_kredit";
 
@@ -36,10 +37,12 @@ function persist(bills: Bill[]) {
   }
 }
 
+/** Rolls "YYYY-MM-DD" forward by whole months, clamping to the last day of the target
+ * month so a bill due on the 31st doesn't overflow into the following month. */
 function addMonths(iso: string, months: number): string {
-  const d = new Date(`${iso}T00:00:00`);
-  d.setMonth(d.getMonth() + months);
-  return d.toISOString().slice(0, 10);
+  const [y, m, day] = iso.split("-").map(Number);
+  const lastDay = new Date(y, m - 1 + months + 1, 0).getDate();
+  return toLocalIso(new Date(y, m - 1 + months, Math.min(day, lastDay)));
 }
 
 export function useBills() {

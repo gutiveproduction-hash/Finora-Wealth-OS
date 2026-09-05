@@ -3,6 +3,7 @@ import { Download, Upload, FolderOpen, Plus, Trash2 } from "lucide-react";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useCategories } from "@/hooks/useCategories";
 import { COMMON_CURRENCIES } from "@/lib/currency";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import type { CategoryType } from "@/types";
 
 export default function Settings() {
@@ -16,7 +17,9 @@ export default function Settings() {
   const [newCategoryType, setNewCategoryType] = useState<CategoryType>("expense");
   const [dbPath, setDbPath] = useState("");
   const [version, setVersion] = useState("");
-  const [backupMsg, setBackupMsg] = useState<string | null>(null);
+  const [backupMsg, setBackupMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
+  const [confirmImport, setConfirmImport] = useState(false);
 
   useEffect(() => {
     window.api.backup.dbPath().then(setDbPath);
@@ -38,14 +41,22 @@ export default function Settings() {
 
   async function handleExport() {
     const result = await window.api.backup.exportJson();
-    setBackupMsg(result.ok ? `Data berhasil diekspor ke ${result.filePath}` : null);
+    // Tanpa pesan gagal, tombol terlihat tidak bereaksi kalau ekspor error.
+    setBackupMsg(
+      result.ok
+        ? { text: `Data berhasil diekspor ke ${result.filePath}`, ok: true }
+        : { text: "Ekspor dibatalkan atau gagal.", ok: false }
+    );
   }
 
   async function handleImport() {
+    setConfirmImport(false);
     const result = await window.api.backup.importJson();
     if (result.ok) {
-      setBackupMsg("Data berhasil diimpor. Memuat ulang...");
+      setBackupMsg({ text: "Data berhasil diimpor. Memuat ulang...", ok: true });
       setTimeout(() => window.location.reload(), 800);
+    } else {
+      setBackupMsg({ text: result.reason ?? "Impor dibatalkan atau gagal.", ok: false });
     }
   }
 
@@ -53,6 +64,14 @@ export default function Settings() {
     if (!newCategoryName.trim()) return;
     await createCategory({ name: newCategoryName.trim(), type: newCategoryType });
     setNewCategoryName("");
+  }
+
+  /** Kategori yang masih dipakai transaksi ditolak backend — tampilkan alasannya,
+   * karena sebelumnya tombol hapus terlihat tidak melakukan apa-apa. */
+  async function handleDeleteCategory(id: string) {
+    setCategoryError(null);
+    const result = await deleteCategory(id);
+    if (!result.ok) setCategoryError(result.reason ?? "Kategori tidak bisa dihapus.");
   }
 
   return (
@@ -81,6 +100,9 @@ export default function Settings() {
               <div key={r.currency} className="flex items-center gap-2">
                 <span className="w-14 text-sm font-medium">{r.currency}</span>
                 <input
+                  // Input tak terkontrol: kunci ikut nilainya supaya field ikut
+                  // ter-update saat kurs dihitung ulang (mis. ganti mata uang utama).
+                  key={`${r.currency}-${r.rateToBase}`}
                   className="input !w-40"
                   type="number"
                   step="any"
@@ -134,7 +156,7 @@ export default function Settings() {
                 .map((c) => (
                   <li key={c.id} className="flex items-center justify-between text-sm">
                     <span>{c.name}</span>
-                    <button className="text-neutral-400 hover:text-red-500" onClick={() => deleteCategory(c.id)}>
+                    <button className="text-neutral-400 hover:text-red-500" onClick={() => handleDeleteCategory(c.id)}>
                       <Trash2 size={13} />
                     </button>
                   </li>
@@ -149,7 +171,7 @@ export default function Settings() {
                 .map((c) => (
                   <li key={c.id} className="flex items-center justify-between text-sm">
                     <span>{c.name}</span>
-                    <button className="text-neutral-400 hover:text-red-500" onClick={() => deleteCategory(c.id)}>
+                    <button className="text-neutral-400 hover:text-red-500" onClick={() => handleDeleteCategory(c.id)}>
                       <Trash2 size={13} />
                     </button>
                   </li>
@@ -157,6 +179,9 @@ export default function Settings() {
             </ul>
           </div>
         </div>
+        {categoryError && (
+          <p className="text-xs text-red-600 dark:text-red-400">{categoryError}</p>
+        )}
         <div className="flex gap-2 pt-2 border-t border-neutral-100 dark:border-neutral-800">
           <input
             className="input"
@@ -184,14 +209,16 @@ export default function Settings() {
           <button className="btn-secondary" onClick={handleExport}>
             <Download size={16} /> Ekspor Data (JSON)
           </button>
-          <button className="btn-secondary" onClick={handleImport}>
+          <button className="btn-secondary" onClick={() => setConfirmImport(true)}>
             <Upload size={16} /> Impor Data (JSON)
           </button>
           <button className="btn-ghost" onClick={() => window.api.backup.revealDbFile()}>
             <FolderOpen size={16} /> Buka Lokasi File Database
           </button>
         </div>
-        {backupMsg && <p className="text-xs text-emerald-600">{backupMsg}</p>}
+        {backupMsg && (
+          <p className={`text-xs ${backupMsg.ok ? "text-emerald-600" : "text-red-600 dark:text-red-400"}`}>{backupMsg.text}</p>
+        )}
         <p className="text-xs text-neutral-400 break-all">Lokasi database: {dbPath}</p>
       </section>
 
@@ -203,6 +230,15 @@ export default function Settings() {
           dibuat untuk berjalan sepenuhnya offline di komputer Anda.
         </p>
       </section>
+
+      <ConfirmDialog
+        open={confirmImport}
+        title="Impor Data?"
+        message="Impor akan MENGHAPUS seluruh data yang ada sekarang dan menggantinya dengan isi file backup. Pastikan Anda sudah mengekspor data terbaru sebelum melanjutkan."
+        confirmLabel="Impor & Timpa"
+        onConfirm={handleImport}
+        onCancel={() => setConfirmImport(false)}
+      />
     </div>
   );
 }

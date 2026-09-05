@@ -164,8 +164,17 @@ export default function Dashboard() {
   const savingsRateChangePct = comparisonSavingsRate !== undefined ? savingsRate - comparisonSavingsRate : undefined;
 
   const netFlowSelected = selectedTotals.income - selectedTotals.expense;
-  const approxBalanceStart = liquidCash - netFlowSelected;
-  const totalSaldoChangePct = approxBalanceStart !== 0 ? (netFlowSelected / Math.abs(approxBalanceStart)) * 100 : undefined;
+
+  // "Total Saldo" selalu menampilkan saldo LIVE hari ini, tidak ikut toggle Bulan Ini/Bulan
+  // Lalu di atas (lihat pemakaiannya di bawah — nilainya selalu `liquidCash`, bukan
+  // `selectedTotals`). Perubahannya karena itu harus dibandingkan terhadap arus kas bulan
+  // BERJALAN, bukan `selectedTotals` yang ikut berubah saat toggle "Bulan Lalu" — kalau
+  // tidak, membuka "Bulan Lalu" akan mencampur saldo hari ini dengan arus kas bulan lalu
+  // dan menghasilkan persentase yang salah/tidak masuk akal.
+  const currentMonthTotals = monthlyTotals.get(currentMonth()) ?? { income: 0, expense: 0 };
+  const netFlowThisMonth = currentMonthTotals.income - currentMonthTotals.expense;
+  const approxBalanceStart = liquidCash - netFlowThisMonth;
+  const totalSaldoChangePct = approxBalanceStart !== 0 ? (netFlowThisMonth / Math.abs(approxBalanceStart)) * 100 : undefined;
 
   const netWorthChangePct = useMemo(() => {
     if (snapshots.length < 2) return undefined;
@@ -263,7 +272,14 @@ export default function Dashboard() {
       <DashboardHeader monthView={monthView} onChangeMonthView={setMonthView} onQuickSpend={() => setIsQuickSpendOpen(true)} />
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <QuickStatCard label="Total Saldo" value={formatCurrency(liquidCash, baseCurrency)} icon={Wallet} changePct={totalSaldoChangePct} isPrivate={isPrivate} />
+        <QuickStatCard
+          label="Total Saldo"
+          value={formatCurrency(liquidCash, baseCurrency)}
+          icon={Wallet}
+          changePct={totalSaldoChangePct}
+          changeLabel="sejak awal bulan ini"
+          isPrivate={isPrivate}
+        />
         <QuickStatCard
           label="Pemasukan"
           value={formatCurrency(selectedTotals.income, baseCurrency)}

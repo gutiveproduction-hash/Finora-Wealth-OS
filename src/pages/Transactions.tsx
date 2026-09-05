@@ -9,7 +9,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ImportCsvModal } from "@/components/ImportCsvModal";
 import { CurrencyInput } from "@/components/ui/CurrencyInput";
-import { formatCurrency, formatDate, todayIso } from "@/lib/format";
+import { formatCurrency, formatDate, formatNumber, todayIso } from "@/lib/format";
+import { useSettingsStore } from "@/store/useSettingsStore";
 import type { Transaction, TransactionType } from "@/types";
 
 const emptyForm = {
@@ -18,6 +19,8 @@ const emptyForm = {
   type: "expense" as TransactionType,
   transferAccountId: "",
   amount: "",
+  /** Jumlah yang diterima akun tujuan, hanya dipakai untuk transfer lintas mata uang. */
+  transferAmount: "",
   date: todayIso(),
   note: "",
 };
@@ -36,20 +39,50 @@ export default function Transactions() {
   });
   const { accounts } = useAccounts();
   const { categories } = useCategories();
+  const ratesMap = useSettingsStore((s) => s.ratesMap);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Transaction | null>(null);
   const [form, setForm] = useState(emptyForm);
+  /** Sekali pengguna mengetik jumlah diterima sendiri, berhenti menimpanya dengan hasil konversi. */
+  const [transferAmountTouched, setTransferAmountTouched] = useState(false);
 
   const accountMap = useMemo(() => new Map(accounts.map((a) => [a.id, a])), [accounts]);
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
   const relevantCategories = categories.filter((c) => c.type === (form.type === "income" ? "income" : "expense"));
 
+  const sourceCurrency = accountMap.get(form.accountId)?.currency ?? "IDR";
+  const destinationCurrency = accountMap.get(form.transferAccountId)?.currency ?? sourceCurrency;
+  const isCrossCurrencyTransfer = form.type === "transfer" && sourceCurrency !== destinationCurrency;
+
+  /** Konversi berdasarkan kurs yang berlaku SEKARANG, dipakai sebagai nilai awal saja —
+   * angkanya bisa diubah manual agar sesuai kurs hari transaksi itu, lalu dikunci di
+   * transaksi supaya saldo historis tidak berubah saat kurs di Pengaturan diperbarui. */
+  function convertAtCurrentRate(amount: number): number {
+    const from = ratesMap[sourceCurrency] ?? 1;
+    const to = ratesMap[destinationCurrency] ?? 1;
+    if (!to) return amount;
+    return (amount * from) / to;
+  }
+
+  // Isi otomatis jumlah diterima dari kurs saat ini setiap kali nominal / akun tujuan
+  // berubah, selama pengguna belum mengetiknya sendiri.
+  useEffect(() => {
+    if (!isCrossCurrencyTransfer || transferAmountTouched) return;
+    const source = Number(form.amount);
+    if (!source) return;
+    const converted = convertAtCurrentRate(source);
+    const rounded = destinationCurrency === "IDR" || destinationCurrency === "JPY" ? Math.round(converted) : Number(converted.toFixed(2));
+    setForm((f) => (f.transferAmount === String(rounded) ? f : { ...f, transferAmount: String(rounded) }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.amount, form.accountId, form.transferAccountId, isCrossCurrencyTransfer, transferAmountTouched]);
+
   function openCreate() {
     setEditing(null);
     setForm({ ...emptyForm, accountId: accounts[0]?.id ?? "" });
+    setTransferAmountTouched(false);
     setModalOpen(true);
   }
 
@@ -71,9 +104,11 @@ export default function Transactions() {
       type: tx.type,
       transferAccountId: tx.transferAccountId ?? "",
       amount: String(tx.amount),
+      transferAmount: tx.transferAmount != null ? String(tx.transferAmount) : "",
       date: tx.date.slice(0, 10),
       note: tx.note,
     });
+    setTransferAmountTouched(tx.transferAmount != null);
     setModalOpen(true);
   }
 
@@ -84,11 +119,13 @@ export default function Transactions() {
       categoryId: form.type === "transfer" ? null : form.categoryId || null,
       type: form.type,
       transferAccountId: form.type === "transfer" ? form.transferAccountId || null : null,
+      transferAmount: isCrossCurrencyTransfer ? Number(form.transferAmount) || 0 : null,
       amount: Number(form.amount) || 0,
       date: form.date,
       note: form.note,
     };
     if (!payload.accountId || payload.amount <= 0) return;
+    if (isCrossCurrencyTransfer && (payload.transferAmount ?? 0) <= 0) return;
     if (editing) {
       await updateTransaction(editing.id, payload);
     } else {
@@ -187,6 +224,12 @@ export default function Transactions() {
                     >
                       {t.type === "income" ? "+" : t.type === "expense" ? "-" : ""}
                       {formatCurrency(t.amount, t.currency)}
+                      {/* Transfer lintas mata uang: tampilkan juga jumlah yang diterima. */}
+                      {t.transferAmount != null && transferAccount && (
+                        <div className="text-xs font-normal text-neutral-400">
+                          → {formatCurrency(t.transferAmount, transferAccount.currency)}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-2.5">
                       <div className="flex gap-1 justify-end">
@@ -208,16 +251,19 @@ export default function Transactions() {
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? "Ubah Transaksi" : "Tambah Transaksi"}>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800/80">
             {(["expense", "income", "transfer"] as TransactionType[]).map((t) => (
               <button
                 key={t}
                 type="button"
-                onClick={() => setForm((f) => ({ ...f, type: t }))}
-                className={`btn-secondary !bg-transparent border ${
+                aria-pressed={form.type === t}
+                // Ganti jenis transaksi mengganti daftar kategori yang relevan, jadi kategori
+                // lama harus dikosongkan agar tidak tersimpan kategori dari jenis yang salah.
+                onClick={() => setForm((f) => (f.type === t ? f : { ...f, type: t, categoryId: "" }))}
+                className={`px-3 py-2 text-sm font-semibold rounded-lg transition-colors ${
                   form.type === t
-                    ? "border-brand-500 text-brand-600 bg-brand-50 dark:bg-brand-950"
-                    : "border-neutral-200 dark:border-neutral-700"
+                    ? "bg-white dark:bg-neutral-800 text-brand-600 dark:text-brand-400 shadow-xs"
+                    : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200"
                 }`}
               >
                 {t === "expense" ? "Pengeluaran" : t === "income" ? "Pemasukan" : "Transfer"}
@@ -282,9 +328,9 @@ export default function Transactions() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="label">Jumlah</label>
+              <label className="label">{isCrossCurrencyTransfer ? `Jumlah Dikirim (${sourceCurrency})` : "Jumlah"}</label>
               <CurrencyInput
-                currency={accountMap.get(form.accountId)?.currency ?? "IDR"}
+                currency={sourceCurrency}
                 value={form.amount}
                 onChange={(v) => setForm((f) => ({ ...f, amount: v }))}
                 required
@@ -301,6 +347,40 @@ export default function Transactions() {
               />
             </div>
           </div>
+
+          {isCrossCurrencyTransfer && (
+            <div>
+              <label className="label">Jumlah Diterima ({destinationCurrency})</label>
+              <CurrencyInput
+                currency={destinationCurrency}
+                value={form.transferAmount}
+                onChange={(v) => {
+                  setTransferAmountTouched(true);
+                  setForm((f) => ({ ...f, transferAmount: v }));
+                }}
+                required
+              />
+              <div className="flex items-center justify-between gap-2 mt-1">
+                <p className="text-xs text-neutral-400">
+                  {Number(form.amount) > 0 && Number(form.transferAmount) > 0
+                    ? `Kurs transaksi ini: 1 ${destinationCurrency} = ${formatNumber(
+                        Number(form.amount) / Number(form.transferAmount),
+                        4
+                      )} ${sourceCurrency}. Kurs dikunci di transaksi ini, jadi saldo lama tidak berubah kalau kurs di Pengaturan diperbarui.`
+                    : "Isi sesuai jumlah yang benar-benar masuk ke akun tujuan pada tanggal transaksi."}
+                </p>
+                {transferAmountTouched && (
+                  <button
+                    type="button"
+                    className="btn-ghost text-xs shrink-0 !py-1"
+                    onClick={() => setTransferAmountTouched(false)}
+                  >
+                    Pakai kurs sekarang
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="label">Catatan</label>

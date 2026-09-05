@@ -2,7 +2,7 @@ import { ipcMain } from "electron";
 import { eq } from "drizzle-orm";
 import { getDb, getRawSqlite } from "../db";
 import { assets, holdings, transactions } from "../db/schema";
-import { newId, nowIso } from "../utils/id";
+import { newId, nowIso, todayIso } from "../utils/id";
 
 export function registerInvestmentHandlers() {
   // ---- Assets -------------------------------------------------------------
@@ -66,7 +66,7 @@ export function registerInvestmentHandlers() {
     const db = getDb();
     const sqlite = getRawSqlite();
     await db.update(assets).set({ currentPrice: price, updatedAt: nowIso() }).where(eq(assets.id, id));
-    const historyDate = date ?? new Date().toISOString().slice(0, 10);
+    const historyDate = date ?? todayIso();
     sqlite
       .prepare(
         `INSERT INTO price_history (id, asset_id, date, price, created_at)
@@ -134,7 +134,7 @@ export function registerInvestmentHandlers() {
           transferAccountId: null,
           amount: Math.abs(input.quantity * input.avgBuyPrice),
           currency: input.currency || "IDR",
-          date: input.date ?? new Date().toISOString().slice(0, 10),
+          date: input.date ?? todayIso(),
           note: `Pembelian ${asset?.name ?? "aset"} (${input.quantity} unit)`,
           createdAt: nowIso(),
         });

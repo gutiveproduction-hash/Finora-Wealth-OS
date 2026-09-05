@@ -44,8 +44,23 @@ export function registerBackupHandlers() {
     });
     if (result.canceled || result.filePaths.length === 0) return { ok: false };
 
-    const raw = fs.readFileSync(result.filePaths[0], "utf-8");
-    const data = JSON.parse(raw) as Record<string, Array<Record<string, unknown>>>;
+    let data: Record<string, Array<Record<string, unknown>>>;
+    try {
+      data = JSON.parse(fs.readFileSync(result.filePaths[0], "utf-8"));
+    } catch {
+      return { ok: false, reason: "File tidak bisa dibaca sebagai JSON." };
+    }
+
+    // Impor menghapus SEMUA tabel sebelum menulis ulang. Tanpa validasi ini, memilih file
+    // JSON yang salah akan mengosongkan seluruh database tanpa peringatan apa pun.
+    const meta = Array.isArray(data?._meta) ? (data._meta[0] as { app?: string } | undefined) : undefined;
+    if (meta?.app !== "finora") {
+      return { ok: false, reason: "File ini bukan hasil ekspor Finora — impor dibatalkan agar data Anda tidak terhapus." };
+    }
+    if (!TABLES.some((table) => Array.isArray(data[table]) && data[table].length > 0)) {
+      return { ok: false, reason: "File backup kosong — impor dibatalkan agar data Anda tidak terhapus." };
+    }
+
     const sqlite = getRawSqlite();
 
     const run = sqlite.transaction(() => {
@@ -59,7 +74,12 @@ export function registerBackupHandlers() {
         for (const row of rows) stmt.run(row);
       }
     });
-    run();
+    try {
+      run();
+    } catch (err) {
+      // Transaksi SQLite otomatis rollback, jadi data lama tetap utuh.
+      return { ok: false, reason: `Struktur file backup tidak cocok: ${(err as Error).message}` };
+    }
 
     return { ok: true };
   });

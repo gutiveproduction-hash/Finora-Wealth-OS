@@ -47,7 +47,24 @@ export function registerTransactionHandlers() {
 
     const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
     const limit = filters.limit ? `LIMIT ${Number(filters.limit)}` : "";
-    const sql = `SELECT * FROM transactions ${where} ORDER BY date DESC, created_at DESC ${limit}`;
+    // "SELECT *" returns raw snake_case column names (account_id, category_id, ...), but
+    // every consumer in the renderer expects camelCase (Transaction type, accountMap /
+    // categoryMap lookups). Without this aliasing, t.accountId and t.categoryId are always
+    // undefined — every row silently loses its account and category in the UI while
+    // same-spelled fields (date, amount, note) happen to still work.
+    const sql = `SELECT
+        id,
+        account_id as accountId,
+        category_id as categoryId,
+        type,
+        transfer_account_id as transferAccountId,
+        amount,
+        transfer_amount as transferAmount,
+        currency,
+        date,
+        note,
+        created_at as createdAt
+      FROM transactions ${where} ORDER BY date DESC, created_at DESC ${limit}`;
     const rows = sqlite.prepare(sql).all(params);
     return rows;
   });
@@ -61,6 +78,8 @@ export function registerTransactionHandlers() {
         categoryId?: string | null;
         type: "income" | "expense" | "transfer";
         transferAccountId?: string | null;
+        /** Jumlah diterima akun tujuan, untuk transfer lintas mata uang. */
+        transferAmount?: number | null;
         amount: number;
         date: string;
         note?: string;
@@ -76,6 +95,8 @@ export function registerTransactionHandlers() {
         categoryId: input.type === "transfer" ? null : input.categoryId ?? null,
         type: input.type,
         transferAccountId: input.type === "transfer" ? input.transferAccountId ?? null : null,
+        transferAmount:
+          input.type === "transfer" && input.transferAmount != null ? Math.abs(input.transferAmount) : null,
         amount: Math.abs(input.amount),
         currency: account.currency,
         date: input.date,
@@ -90,6 +111,7 @@ export function registerTransactionHandlers() {
   ipcMain.handle("transactions:update", async (_e, id: string, patch: Partial<typeof transactions.$inferInsert>) => {
     const db = getDb();
     if (typeof patch.amount === "number") patch.amount = Math.abs(patch.amount);
+    if (typeof patch.transferAmount === "number") patch.transferAmount = Math.abs(patch.transferAmount);
     await db.update(transactions).set(patch).where(eq(transactions.id, id));
     return true;
   });

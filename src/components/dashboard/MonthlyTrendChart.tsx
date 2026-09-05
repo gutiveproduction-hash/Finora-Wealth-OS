@@ -27,9 +27,9 @@ export function MonthlyTrendChart({ data, currency }: { data: MonthlyTrendPoint[
             <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={(v) => formatCompactCurrency(v, currency)} width={56} />
             <Tooltip formatter={(value: number, name: string) => [formatCurrency(value, currency), name]} contentStyle={{ borderRadius: 8, fontSize: 12 }} />
             <Legend wrapperStyle={{ fontSize: 12 }} formatter={(v) => <span className="text-neutral-600 dark:text-neutral-300">{v}</span>} />
-            <Bar dataKey="income" name="Income" fill="#10b981" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="expense" name="Expense" fill="#f43f5e" radius={[4, 4, 0, 0]} />
-            <Line type="monotone" dataKey="net" name="Net" stroke="#3b82f6" strokeWidth={2.5} dot={{ r: 3 }} />
+            <Bar dataKey="income" name="Pemasukan" fill="#10b981" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="expense" name="Pengeluaran" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+            <Line type="monotone" dataKey="net" name="Arus Bersih" stroke="#3b82f6" strokeWidth={2.5} dot={{ r: 3 }} />
           </ComposedChart>
         </ResponsiveContainer>
       )}

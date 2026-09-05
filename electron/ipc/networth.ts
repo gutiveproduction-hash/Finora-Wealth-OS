@@ -1,7 +1,7 @@
 import { ipcMain } from "electron";
 import { getDb, getRawSqlite } from "../db";
 import { netWorthSnapshots } from "../db/schema";
-import { newId, nowIso } from "../utils/id";
+import { newId, nowIso, todayIso } from "../utils/id";
 import { getRatesMap, getBaseCurrency, toBase } from "../utils/currency";
 import { computeAccountBalance } from "./accounts";
 
@@ -75,7 +75,7 @@ export function registerNetWorthHandlers() {
   ipcMain.handle("networth:recordSnapshot", async (_e, date?: string) => {
     const summary = computeNetWorthSummary();
     const sqlite = getRawSqlite();
-    const snapshotDate = date ?? new Date().toISOString().slice(0, 10);
+    const snapshotDate = date ?? todayIso();
     sqlite
       .prepare(
         `INSERT INTO net_worth_snapshots (id, date, total_assets, total_liabilities, net_worth, base_currency, created_at)

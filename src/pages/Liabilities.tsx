@@ -8,14 +8,19 @@ import { StatCard } from "@/components/ui/StatCard";
 import { CurrencyInput } from "@/components/ui/CurrencyInput";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { LIABILITY_TYPE_LABELS } from "@/lib/chartColors";
-import { COMMON_CURRENCIES } from "@/lib/currency";
+import { COMMON_CURRENCIES, toBase } from "@/lib/currency";
+import { useSettingsStore } from "@/store/useSettingsStore";
 import type { Liability, LiabilityType } from "@/types";
 
 const LIABILITY_TYPES: LiabilityType[] = ["loan", "credit_card", "mortgage", "other"];
 const emptyForm = { name: "", type: "loan" as LiabilityType, balance: "0", currency: "IDR", interestRate: "0", dueDate: "", notes: "" };
 
 export default function Liabilities() {
-  const { liabilities, loading, createLiability, updateLiability, deleteLiability, totalBalance } = useLiabilities();
+  const { liabilities, loading, createLiability, updateLiability, deleteLiability } = useLiabilities();
+  const baseCurrency = useSettingsStore((s) => s.baseCurrency);
+  const ratesMap = useSettingsStore((s) => s.ratesMap);
+  // Liabilitas bisa beda-beda mata uangnya, jadi harus dikonversi dulu sebelum dijumlahkan.
+  const totalBalanceBase = liabilities.reduce((s, l) => s + toBase(l.balance, l.currency, ratesMap), 0);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Liability | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Liability | null>(null);
@@ -70,7 +75,7 @@ export default function Liabilities() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <StatCard label="Total Liabilitas (per mata uang aslinya)" value={formatCurrency(totalBalance, "IDR")} />
+        <StatCard label="Total Liabilitas" value={formatCurrency(totalBalanceBase, baseCurrency)} />
         <button className="btn-primary" onClick={openCreate}>
           <Plus size={16} /> Tambah Liabilitas
         </button>

@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   type TEXT NOT NULL,
   transfer_account_id TEXT,
   amount REAL NOT NULL,
+  transfer_amount REAL,
   currency TEXT NOT NULL DEFAULT 'IDR',
   date TEXT NOT NULL,
   note TEXT NOT NULL DEFAULT '',
@@ -147,6 +148,11 @@ function runMigrations(sqliteDb: Database.Database) {
   const assetCols = sqliteDb.prepare("PRAGMA table_info(assets)").all() as { name: string }[];
   if (!assetCols.some((c) => c.name === "exclude_from_balance")) {
     sqliteDb.exec("ALTER TABLE assets ADD COLUMN exclude_from_balance INTEGER NOT NULL DEFAULT 0");
+  }
+
+  const txCols = sqliteDb.prepare("PRAGMA table_info(transactions)").all() as { name: string }[];
+  if (!txCols.some((c) => c.name === "transfer_amount")) {
+    sqliteDb.exec("ALTER TABLE transactions ADD COLUMN transfer_amount REAL");
   }
 }
 

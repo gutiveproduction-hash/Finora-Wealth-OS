@@ -62,8 +62,12 @@ export function ActivityFeed({
                     <div className="text-xs font-semibold text-neutral-900 dark:text-neutral-100 truncate">
                       {t.note || category?.name || "Transaksi"}
                     </div>
-                    <div className="text-[11px] text-neutral-400 font-mono-numbers">
-                      {account?.name} · {formatDate(t.date)}
+                    {/* Kategori ikut ditampilkan — sebelumnya hanya muncul sebagai judul
+                        saat transaksi tidak punya catatan, jadi seolah-olah hilang. */}
+                    <div className="text-[11px] text-neutral-400 font-mono-numbers truncate">
+                      {[account?.name, category?.name ?? (t.type === "transfer" ? "Transfer" : "Tanpa kategori"), formatDate(t.date)]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </div>
                   </div>
                 </div>

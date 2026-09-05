@@ -187,7 +187,7 @@ export default function Investments() {
                     {asset.name}
                     {asset.excludeFromBalance && (
                       <span className="text-[10px] font-normal uppercase tracking-wide px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-500">
-                        Tidak mengurangi saldo
+                        Di luar kekayaan bersih
                       </span>
                     )}
                   </div>
@@ -322,11 +322,12 @@ export default function Investments() {
                 checked={assetForm.excludeFromBalance}
                 onChange={(e) => setAssetForm((f) => ({ ...f, excludeFromBalance: e.target.checked }))}
               />
-              Tidak mengurangi saldo saat ini
+              Jangan hitung dalam total aset &amp; kekayaan bersih
             </label>
             <p className="text-xs text-neutral-400 mt-1">
-              Aktifkan jika aset ini (mis. properti atau aset yang sudah dimiliki) tidak dibeli menggunakan salah satu
-              akun yang tercatat di aplikasi.
+              Aset tetap tercatat dan nilainya tetap dipantau di halaman ini, tapi tidak ikut dijumlahkan ke Total Aset
+              maupun Kekayaan Bersih. Aktifkan kalau nilainya sudah tercermin di saldo akun lain (supaya tidak dihitung
+              dua kali) atau memang sengaja tidak ingin dimasukkan ke perhitungan.
             </p>
           </div>
           <div className="flex justify-end gap-2 pt-2">

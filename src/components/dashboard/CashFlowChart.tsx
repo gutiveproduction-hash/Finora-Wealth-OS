@@ -40,9 +40,9 @@ export function CashFlowChart({ data, currency, monthLabel }: { data: CashFlowPo
               contentStyle={{ borderRadius: 8, fontSize: 12 }}
             />
             <Legend wrapperStyle={{ fontSize: 12 }} formatter={(v) => <span className="text-neutral-600 dark:text-neutral-300">{v}</span>} />
-            <Area type="monotone" dataKey="income" name="Income" stroke="#10b981" fill="url(#cfIncome)" strokeWidth={2} />
-            <Area type="monotone" dataKey="expense" name="Expense" stroke="#f43f5e" fill="url(#cfExpense)" strokeWidth={2} />
-            <Area type="monotone" dataKey="net" name="Net" stroke="#3b82f6" fill="none" strokeWidth={2} />
+            <Area type="monotone" dataKey="income" name="Pemasukan" stroke="#10b981" fill="url(#cfIncome)" strokeWidth={2} />
+            <Area type="monotone" dataKey="expense" name="Pengeluaran" stroke="#f43f5e" fill="url(#cfExpense)" strokeWidth={2} />
+            <Area type="monotone" dataKey="net" name="Arus Bersih" stroke="#3b82f6" fill="none" strokeWidth={2} />
           </AreaChart>
         </ResponsiveContainer>
       )}

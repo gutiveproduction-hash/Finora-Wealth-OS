@@ -2,9 +2,17 @@ import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import type { Account } from "@/types";
 import { formatCurrency } from "@/lib/format";
+import { toBase } from "@/lib/currency";
+import { useSettingsStore } from "@/store/useSettingsStore";
 
 export function AccountBalancesList({ accounts, isPrivate }: { accounts: Account[]; isPrivate: boolean }) {
-  const sorted = [...accounts].filter((a) => !a.archived).sort((a, b) => b.balance - a.balance);
+  const ratesMap = useSettingsStore((s) => s.ratesMap);
+  // Urutkan berdasarkan saldo yang sudah dikonversi ke mata uang utama — mengurutkan
+  // angka mentah lintas mata uang (mis. saldo kecil dalam USD vs saldo besar dalam IDR)
+  // menghasilkan urutan yang tidak berarti.
+  const sorted = [...accounts]
+    .filter((a) => !a.archived)
+    .sort((a, b) => toBase(b.balance, b.currency, ratesMap) - toBase(a.balance, a.currency, ratesMap));
 
   return (
     <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="card p-5 h-full flex flex-col">

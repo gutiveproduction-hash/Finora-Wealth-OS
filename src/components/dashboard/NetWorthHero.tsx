@@ -49,13 +49,28 @@ export function NetWorthHero({
               <span className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                 Kekayaan Bersih
               </span>
+              {/* Warna badge ikut kondisinya — sebelumnya "Perlu Perhatian" pun tampil hijau. */}
               <motion.span
                 whileHover={{ scale: 1.05 }}
-                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/50"
+                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${
+                  debtRatio < 30
+                    ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200/60 dark:border-emerald-800/50"
+                    : debtRatio < 60
+                      ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200/60 dark:border-amber-800/50"
+                      : "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border-rose-200/60 dark:border-rose-800/50"
+                }`}
               >
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  <span
+                    className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                      debtRatio < 30 ? "bg-emerald-400" : debtRatio < 60 ? "bg-amber-400" : "bg-rose-400"
+                    }`}
+                  />
+                  <span
+                    className={`relative inline-flex rounded-full h-2 w-2 ${
+                      debtRatio < 30 ? "bg-emerald-500" : debtRatio < 60 ? "bg-amber-500" : "bg-rose-500"
+                    }`}
+                  />
                 </span>
                 <ShieldCheck className="w-3 h-3" />
                 {debtRatio < 30 ? "Sangat Sehat" : debtRatio < 60 ? "Cukup Terjaga" : "Perlu Perhatian"}

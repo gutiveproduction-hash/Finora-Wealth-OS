@@ -3,7 +3,7 @@ import fs from "node:fs";
 import Papa from "papaparse";
 import { getDb } from "../db";
 import { transactions, accounts } from "../db/schema";
-import { newId, nowIso } from "../utils/id";
+import { newId, nowIso, todayIso } from "../utils/id";
 import { eq } from "drizzle-orm";
 
 export interface CsvColumnMapping {
@@ -46,7 +46,7 @@ function parseDate(raw: string, dayFirst: boolean): string | null {
     }
   }
   const fallback = new Date(trimmed);
-  if (!Number.isNaN(fallback.getTime())) return fallback.toISOString().slice(0, 10);
+  if (!Number.isNaN(fallback.getTime())) return todayIso(fallback);
   return null;
 }
 

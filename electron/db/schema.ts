@@ -49,6 +49,11 @@ export const transactions = sqliteTable("transactions", {
   type: text("type", { enum: ["income", "expense", "transfer"] }).notNull(),
   transferAccountId: text("transfer_account_id"),
   amount: real("amount").notNull(),
+  /** Untuk transfer antar akun beda mata uang: jumlah yang benar-benar diterima akun
+   * tujuan, dalam mata uang akun tujuan. Kursnya dikunci saat transaksi dicatat supaya
+   * saldo historis tidak ikut berubah ketika kurs di Pengaturan diperbarui. NULL kalau
+   * mata uangnya sama. */
+  transferAmount: real("transfer_amount"),
   currency: text("currency").notNull().default("IDR"),
   date: text("date").notNull(),
   note: text("note").notNull().default(""),

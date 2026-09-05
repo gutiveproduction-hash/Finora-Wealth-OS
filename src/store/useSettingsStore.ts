@@ -44,8 +44,28 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   },
 
   setBaseCurrency: async (currency) => {
+    const { baseCurrency: previous, rates } = get();
+    if (currency === previous) return;
+
     set({ baseCurrency: currency });
     await window.api.settings.set("baseCurrency", currency);
+
+    // Kurs tersimpan relatif terhadap mata uang utama yang LAMA. Tanpa dihitung ulang,
+    // semua konversi (kekayaan bersih, dashboard, portofolio) jadi salah total setelah
+    // mata uang utama diganti.
+    const divisor = rates.find((r) => r.currency === currency)?.rateToBase;
+    if (!divisor || divisor <= 0) {
+      // Tidak ada kurs untuk mata uang baru — set 1 dan biarkan sisanya diisi manual.
+      await window.api.exchangeRates.upsert(currency, 1);
+    } else if (divisor !== 1) {
+      for (const r of rates) {
+        await window.api.exchangeRates.upsert(r.currency, r.rateToBase / divisor);
+      }
+      if (!rates.some((r) => r.currency === previous)) {
+        await window.api.exchangeRates.upsert(previous, 1 / divisor);
+      }
+    }
+    await get().refreshRates();
   },
 
   togglePrivacy: async () => {

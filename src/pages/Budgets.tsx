@@ -11,13 +11,21 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 
 /** Local-state wrapper so the per-category budget field can use CurrencyInput's
  * controlled value/onChange while still only committing on blur. */
-function BudgetAmountInput({ initial, onCommit }: { initial: number | ""; onCommit: (value: number) => void }) {
+function BudgetAmountInput({
+  initial,
+  currency,
+  onCommit,
+}: {
+  initial: number | "";
+  currency: string;
+  onCommit: (value: number) => void;
+}) {
   const [value, setValue] = useState(initial === "" ? "" : String(initial));
 
   return (
     <CurrencyInput
       className="input !py-1.5 text-sm"
-      currency="IDR"
+      currency={currency}
       placeholder="Anggaran"
       value={value}
       onChange={setValue}
@@ -71,14 +79,15 @@ export default function Budgets() {
             return (
               <div key={c.id} className="flex items-center gap-4">
                 <div className="flex-1">
-                  <BudgetProgressBar label={c.name} spent={spent} budget={budget?.amount ?? 0} currency={c.type === "expense" ? "IDR" : "IDR"} color={colorForIndex(i)} />
+                  <BudgetProgressBar label={c.name} spent={spent} budget={budget?.amount ?? 0} currency={baseCurrency} color={colorForIndex(i)} />
                 </div>
                 <div className="w-36">
                   <BudgetAmountInput
                     key={`${c.id}-${month}`}
                     initial={budget?.amount ?? ""}
+                    currency={baseCurrency}
                     onCommit={(value) => {
-                      if (value > 0) setBudget(c.id, value);
+                      if (value > 0) setBudget(c.id, value, baseCurrency);
                       else if (budget) deleteBudget(budget.id);
                     }}
                   />

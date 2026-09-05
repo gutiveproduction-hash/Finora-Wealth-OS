@@ -66,8 +66,19 @@ export function HealthMetricsGrid({
         <div className="w-full h-1.5 bg-neutral-100 dark:bg-neutral-800 rounded-full mt-2 overflow-hidden">
           <motion.div className={`h-full rounded-full ${debtRatio < 35 ? "bg-emerald-500" : "bg-amber-500"}`} initial={{ width: 0 }} animate={{ width: `${Math.min(100, debtRatio)}%` }} transition={{ duration: 0.8, ease: "easeOut" }} />
         </div>
-        <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-2 font-medium">
-          {debtRatio < 30 ? "✓ Rasio sangat aman (<30%)" : "Rasio dalam batas normal"}
+        {/* Sebelumnya rasio 200% pun tetap hijau dan disebut "dalam batas normal". */}
+        <p
+          className={`text-[11px] mt-2 font-medium ${
+            debtRatio < 50 ? "text-emerald-600 dark:text-emerald-400" : debtRatio < 80 ? "text-amber-600 dark:text-amber-400" : "text-rose-600 dark:text-rose-400"
+          }`}
+        >
+          {debtRatio < 30
+            ? "✓ Rasio sangat aman (<30%)"
+            : debtRatio < 50
+              ? "Rasio masih sehat"
+              : debtRatio < 80
+                ? "Perlu diwaspadai — utang di atas 50% aset"
+                : "Berisiko — utang mendekati/melebihi total aset"}
         </p>
       </motion.div>
 

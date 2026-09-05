@@ -50,16 +50,23 @@ function uuid(): string {
   });
 }
 
+/** Local-time "YYYY-MM-DD" — `toISOString()` shifts to UTC, which reports the previous
+ * day for WIB (UTC+7) users between 00:00 and 07:00 local time. */
+function localIso(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 function todayIso(offsetDays = 0): string {
   const d = new Date();
   d.setDate(d.getDate() + offsetDays);
-  return d.toISOString().slice(0, 10);
+  return localIso(d);
 }
 
 function monthIso(offsetMonths = 0): string {
   const d = new Date();
+  d.setDate(1); // avoid month-end overflow (e.g. 31 Mar - 1 month)
   d.setMonth(d.getMonth() + offsetMonths);
-  return d.toISOString().slice(0, 7);
+  return localIso(d).slice(0, 7);
 }
 
 interface Store {
@@ -108,15 +115,15 @@ function seedStore(): Store {
   ];
 
   const transactions: Transaction[] = [
-    { id: uuid(), accountId: accBca, categoryId: catGaji, type: "income", transferAccountId: null, amount: 12000000, currency: "IDR", date: todayIso(-28), note: "Gaji bulanan", createdAt: now },
-    { id: uuid(), accountId: accBca, categoryId: catTagihan, type: "expense", transferAccountId: null, amount: 850000, currency: "IDR", date: todayIso(-25), note: "Listrik & internet", createdAt: now },
-    { id: uuid(), accountId: accBca, categoryId: null, type: "transfer", transferAccountId: accGopay, amount: 1500000, currency: "IDR", date: todayIso(-24), note: "Top up GoPay", createdAt: now },
-    { id: uuid(), accountId: accGopay, categoryId: catMakan, type: "expense", transferAccountId: null, amount: 65000, currency: "IDR", date: todayIso(-20), note: "Makan siang", createdAt: now },
-    { id: uuid(), accountId: accGopay, categoryId: catTransport, type: "expense", transferAccountId: null, amount: 45000, currency: "IDR", date: todayIso(-18), note: "Ojek online", createdAt: now },
-    { id: uuid(), accountId: accBca, categoryId: catBelanja, type: "expense", transferAccountId: null, amount: 420000, currency: "IDR", date: todayIso(-15), note: "Belanja bulanan", createdAt: now },
-    { id: uuid(), accountId: accCash, categoryId: catMakan, type: "expense", transferAccountId: null, amount: 30000, currency: "IDR", date: todayIso(-10), note: "Jajan", createdAt: now },
-    { id: uuid(), accountId: accBca, categoryId: catGaji, type: "income", transferAccountId: null, amount: 12000000, currency: "IDR", date: todayIso(-2), note: "Gaji bulanan", createdAt: now },
-    { id: uuid(), accountId: accGopay, categoryId: catMakan, type: "expense", transferAccountId: null, amount: 52000, currency: "IDR", date: todayIso(-1), note: "Kopi & sarapan", createdAt: now },
+    { id: uuid(), accountId: accBca, categoryId: catGaji, type: "income", transferAccountId: null, transferAmount: null, amount: 12000000, currency: "IDR", date: todayIso(-28), note: "Gaji bulanan", createdAt: now },
+    { id: uuid(), accountId: accBca, categoryId: catTagihan, type: "expense", transferAccountId: null, transferAmount: null, amount: 850000, currency: "IDR", date: todayIso(-25), note: "Listrik & internet", createdAt: now },
+    { id: uuid(), accountId: accBca, categoryId: null, type: "transfer", transferAccountId: accGopay, transferAmount: null, amount: 1500000, currency: "IDR", date: todayIso(-24), note: "Top up GoPay", createdAt: now },
+    { id: uuid(), accountId: accGopay, categoryId: catMakan, type: "expense", transferAccountId: null, transferAmount: null, amount: 65000, currency: "IDR", date: todayIso(-20), note: "Makan siang", createdAt: now },
+    { id: uuid(), accountId: accGopay, categoryId: catTransport, type: "expense", transferAccountId: null, transferAmount: null, amount: 45000, currency: "IDR", date: todayIso(-18), note: "Ojek online", createdAt: now },
+    { id: uuid(), accountId: accBca, categoryId: catBelanja, type: "expense", transferAccountId: null, transferAmount: null, amount: 420000, currency: "IDR", date: todayIso(-15), note: "Belanja bulanan", createdAt: now },
+    { id: uuid(), accountId: accCash, categoryId: catMakan, type: "expense", transferAccountId: null, transferAmount: null, amount: 30000, currency: "IDR", date: todayIso(-10), note: "Jajan", createdAt: now },
+    { id: uuid(), accountId: accBca, categoryId: catGaji, type: "income", transferAccountId: null, transferAmount: null, amount: 12000000, currency: "IDR", date: todayIso(-2), note: "Gaji bulanan", createdAt: now },
+    { id: uuid(), accountId: accGopay, categoryId: catMakan, type: "expense", transferAccountId: null, transferAmount: null, amount: 52000, currency: "IDR", date: todayIso(-1), note: "Kopi & sarapan", createdAt: now },
   ];
 
   const budgets: Budget[] = [
@@ -195,7 +202,8 @@ function computeAccountBalance(accountId: string): number {
     if (t.type === "income" && t.accountId === accountId) balance += t.amount;
     else if (t.type === "expense" && t.accountId === accountId) balance -= t.amount;
     else if (t.type === "transfer" && t.accountId === accountId) balance -= t.amount;
-    else if (t.type === "transfer" && t.transferAccountId === accountId) balance += t.amount;
+    // Transfer lintas mata uang: pakai jumlah yang dikunci untuk akun tujuan.
+    else if (t.type === "transfer" && t.transferAccountId === accountId) balance += t.transferAmount ?? t.amount;
   }
   return balance;
 }
@@ -341,6 +349,8 @@ export function createMockApi(): MyNetworthApi {
           categoryId: input.type === "transfer" ? null : input.categoryId ?? null,
           type: (input.type ?? "expense") as TransactionType,
           transferAccountId: input.type === "transfer" ? input.transferAccountId ?? null : null,
+          transferAmount:
+            input.type === "transfer" && input.transferAmount != null ? Math.abs(input.transferAmount) : null,
           amount: Math.abs(input.amount ?? 0),
           currency: acc?.currency ?? "IDR",
           date: input.date ?? todayIso(),
@@ -474,6 +484,7 @@ export function createMockApi(): MyNetworthApi {
             categoryId: input.fundingCategoryId ?? null,
             type: "expense",
             transferAccountId: null,
+            transferAmount: null,
             amount: Math.abs((input.quantity ?? 0) * (input.avgBuyPrice ?? 0)),
             currency: acc?.currency ?? "IDR",
             date: input.date ?? todayIso(),

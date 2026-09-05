@@ -55,12 +55,18 @@ export function formatMonthLabel(month: string): string {
   return new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(d);
 }
 
+/** "YYYY-MM-DD" in the user's local timezone. `toISOString()` would convert to UTC first,
+ * which in WIB (UTC+7) reports the previous day between 00:00 and 07:00 local time. */
+export function toLocalIso(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 export function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return toLocalIso(new Date());
 }
 
 export function currentMonth(): string {
-  return new Date().toISOString().slice(0, 7);
+  return toLocalIso(new Date()).slice(0, 7);
 }
 
 /** Shifts a "YYYY-MM" month string by `delta` months (negative goes back). */

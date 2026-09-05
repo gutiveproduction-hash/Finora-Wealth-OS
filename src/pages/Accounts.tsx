@@ -67,11 +67,6 @@ export default function Accounts() {
     setPendingDelete(null);
   }
 
-  const totalByType = accounts.reduce<Record<string, number>>((acc, a) => {
-    acc[a.type] = (acc[a.type] ?? 0) + a.balance;
-    return acc;
-  }, {});
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
