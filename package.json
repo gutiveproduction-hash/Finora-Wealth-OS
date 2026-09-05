@@ -1,7 +1,7 @@
 {
   "name": "finora",
   "productName": "Finora",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Open-source personal finance & investment portfolio tracker. Offline-first desktop app for macOS and Windows.",
   "author": "Finora Contributors",
   "license": "MIT",
