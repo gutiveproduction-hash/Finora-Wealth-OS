@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, PiggyBank } from "lucide-react";
 import { useBudgets } from "@/hooks/useBudgets";
 import { useCategories } from "@/hooks/useCategories";
+import { useTransactions } from "@/hooks/useTransactions";
+import { MonthlyTrendChart, type MonthlyTrendPoint } from "@/components/dashboard/MonthlyTrendChart";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { BudgetProgressBar } from "@/components/charts/BudgetProgressBar";
 import { CurrencyInput } from "@/components/ui/CurrencyInput";
-import { formatCurrency, formatMonthLabel, currentMonth } from "@/lib/format";
+import { formatCurrency, formatMonthLabel, currentMonth, shiftMonth as shiftMonthFn } from "@/lib/format";
+import { toBase } from "@/lib/currency";
 import { colorForIndex } from "@/lib/chartColors";
 import { useSettingsStore } from "@/store/useSettingsStore";
 
@@ -45,6 +48,29 @@ export default function Budgets() {
   const { budgets, actuals, loading, setBudget, deleteBudget } = useBudgets(month);
   const { categories } = useCategories();
   const baseCurrency = useSettingsStore((s) => s.baseCurrency);
+  const ratesMap = useSettingsStore((s) => s.ratesMap);
+  const { transactions: allTransactions } = useTransactions({});
+
+  // Six-month income/expense trend — moved here from the Dashboard, where it was
+  // one chart too many; it reads as budgeting context.
+  const monthlyTrendData: MonthlyTrendPoint[] = useMemo(() => {
+    const byMonth = new Map<string, { income: number; expense: number }>();
+    for (const t of allTransactions) {
+      if (t.type === "transfer") continue;
+      const key = t.date.slice(0, 7);
+      const entry = byMonth.get(key) ?? { income: 0, expense: 0 };
+      const amount = toBase(t.amount, t.currency, ratesMap);
+      if (t.type === "income") entry.income += amount;
+      else entry.expense += amount;
+      byMonth.set(key, entry);
+    }
+    return Array.from({ length: 6 }, (_, i) => shiftMonthFn(currentMonth(), i - 5)).map((m) => {
+      const totals = byMonth.get(m) ?? { income: 0, expense: 0 };
+      const [y, mm] = m.split("-").map(Number);
+      const label = new Intl.DateTimeFormat("id-ID", { month: "short" }).format(new Date(y, mm - 1, 1));
+      return { month: m, label, income: totals.income, expense: totals.expense, net: totals.income - totals.expense };
+    });
+  }, [allTransactions, ratesMap]);
 
   const expenseCategories = categories.filter((c) => c.type === "expense");
   const budgetMap = new Map(budgets.map((b) => [b.categoryId, b]));
@@ -68,6 +94,8 @@ export default function Budgets() {
           Total: {formatCurrency(totalSpent, baseCurrency)} / {formatCurrency(totalBudget, baseCurrency)}
         </div>
       </div>
+
+      <MonthlyTrendChart data={monthlyTrendData} currency={baseCurrency} />
 
       {expenseCategories.length === 0 ? (
         <EmptyState icon={PiggyBank} title="Belum ada kategori pengeluaran" description="Tambahkan kategori terlebih dahulu di halaman Transaksi." />

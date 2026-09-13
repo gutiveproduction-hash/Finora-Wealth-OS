@@ -1,21 +1,13 @@
 import { useMemo, useState } from "react";
-import { Wallet, ArrowDownCircle, ArrowUpCircle, PiggyBank, Gem } from "lucide-react";
+import { Wallet, ArrowDownCircle, ArrowUpCircle, PiggyBank } from "lucide-react";
 import { NetWorthHero } from "@/components/dashboard/NetWorthHero";
-import { HealthMetricsGrid } from "@/components/dashboard/HealthMetricsGrid";
-import { PortfolioPulseBar, type PulseItem } from "@/components/dashboard/PortfolioPulseBar";
-import { GrowthChart } from "@/components/dashboard/GrowthChart";
-import { AllocationBreakdown, type AllocationBucket } from "@/components/dashboard/AllocationBreakdown";
-import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { DashboardHeader, type MonthView } from "@/components/dashboard/DashboardHeader";
 import { QuickStatCard } from "@/components/dashboard/QuickStatCard";
 import { FinancialHealthGauge } from "@/components/dashboard/FinancialHealthGauge";
 import { CashFlowChart, type CashFlowPoint } from "@/components/dashboard/CashFlowChart";
-import { MonthlyTrendChart, type MonthlyTrendPoint } from "@/components/dashboard/MonthlyTrendChart";
 import { UpcomingBills } from "@/components/dashboard/UpcomingBills";
-import { BillsSummaryCard } from "@/components/dashboard/BillsSummaryCard";
 import { SavingsGoalsProgress } from "@/components/dashboard/SavingsGoalsProgress";
 import { AIInsightCard } from "@/components/dashboard/AIInsightCard";
-import { AccountBalancesList } from "@/components/dashboard/AccountBalancesList";
 import { AllocationDonutChart } from "@/components/charts/AllocationDonutChart";
 import { GoalModal } from "@/components/Modals/GoalModal";
 import { GoalFormModal } from "@/components/Modals/GoalFormModal";
@@ -33,7 +25,7 @@ import { useBills } from "@/hooks/useBills";
 import { useAiInsightSettings } from "@/hooks/useAiInsightSettings";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { toBase } from "@/lib/currency";
-import { formatCompactCurrency, formatCurrency, currentMonth, shiftMonth, daysInMonth } from "@/lib/format";
+import { formatCurrency, currentMonth, shiftMonth, daysInMonth } from "@/lib/format";
 
 const LIQUID_ASSET_TYPES = new Set(["stock", "mutual_fund", "crypto"]);
 
@@ -42,11 +34,11 @@ export default function Dashboard() {
   const ratesMap = useSettingsStore((s) => s.ratesMap);
   const isPrivate = useSettingsStore((s) => s.isPrivate);
 
-  const { summary, snapshots, recordSnapshot, refresh: refreshNetWorth } = useNetWorth();
+  const { summary, snapshots, refresh: refreshNetWorth } = useNetWorth();
   const { accounts, refresh: refreshAccounts } = useAccounts();
   const { assets } = useInvestments();
   const { categories } = useCategories();
-  const { transactions: recentTransactions, createTransaction, refresh: refreshRecent } = useTransactions({ limit: 6 });
+  const { createTransaction, refresh: refreshRecent } = useTransactions({ limit: 6 });
   const { transactions: expenseHistory, refresh: refreshExpenseHistory } = useTransactions({ type: "expense" });
   const { transactions: allTransactions, refresh: refreshAllTransactions } = useTransactions({});
   const { goal, setGoal } = useGoal();
@@ -62,7 +54,6 @@ export default function Dashboard() {
   const [monthView, setMonthView] = useState<MonthView>("current");
 
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
-  const accountMap = useMemo(() => new Map(accounts.map((a) => [a.id, a])), [accounts]);
 
   const liquidCash = useMemo(
     () =>
@@ -82,58 +73,6 @@ export default function Dashboard() {
     const total = Array.from(byMonth.values()).reduce((s, v) => s + v, 0);
     return total / byMonth.size;
   }, [expenseHistory, ratesMap]);
-
-  const liquidMarketTotal = useMemo(() => {
-    const marketAssets = assets
-      .filter((a) => LIQUID_ASSET_TYPES.has(a.type))
-      .reduce((sum, a) => sum + toBase(a.marketValue, a.currency, ratesMap), 0);
-    return liquidCash + marketAssets;
-  }, [assets, liquidCash, ratesMap]);
-
-  const investmentGainPct = useMemo(() => {
-    const totals = assets.reduce(
-      (acc, a) => {
-        acc.cost += toBase(a.totalCost, a.currency, ratesMap);
-        acc.gain += toBase(a.gain, a.currency, ratesMap);
-        return acc;
-      },
-      { cost: 0, gain: 0 }
-    );
-    return totals.cost > 0 ? (totals.gain / totals.cost) * 100 : 0;
-  }, [assets, ratesMap]);
-
-  const allocationBuckets: AllocationBucket[] = useMemo(() => {
-    const byType = new Map<string, { count: number; total: number }>();
-    for (const asset of assets) {
-      const entry = byType.get(asset.type) ?? { count: 0, total: 0 };
-      entry.count += 1;
-      entry.total += toBase(asset.marketValue, asset.currency, ratesMap);
-      byType.set(asset.type, entry);
-    }
-    const cashAccountCount = accounts.filter((a) => a.type !== "investment" && !a.archived).length;
-    const buckets = Array.from(byType.entries()).map(([key, v]) => ({ key, ...v }));
-    if (liquidCash > 0) buckets.push({ key: "cash", count: cashAccountCount, total: liquidCash });
-    return buckets;
-  }, [assets, accounts, liquidCash, ratesMap]);
-
-  const pulseItems: PulseItem[] = useMemo(() => {
-    if (!summary) return [];
-    const debtRatioForPulse = summary.totalAssets > 0 ? (summary.totalLiabilities / summary.totalAssets) * 100 : 0;
-    const items: PulseItem[] = [
-      { id: "networth", symbol: "Net Worth", detail: formatCompactCurrency(summary.netWorth, baseCurrency) },
-      { id: "debt-ratio", symbol: "Rasio Hutang", detail: `${debtRatioForPulse.toFixed(1)}%` },
-    ];
-    const topAssets = [...assets].sort((a, b) => b.marketValue - a.marketValue).slice(0, 6);
-    for (const asset of topAssets) {
-      items.push({
-        id: asset.id,
-        symbol: asset.symbol || asset.name,
-        detail: formatCompactCurrency(toBase(asset.marketValue, asset.currency, ratesMap), baseCurrency),
-        changePercent: asset.gainPct,
-      });
-    }
-    return items;
-  }, [summary, assets, ratesMap, baseCurrency]);
 
   // ---- Month-scoped cash flow (top stat row, cash-flow chart, expense donut) ----
   const selectedMonth = monthView === "current" ? currentMonth() : shiftMonth(currentMonth(), -1);
@@ -198,16 +137,6 @@ export default function Dashboard() {
     return points;
   }, [allTransactions, selectedMonth, ratesMap]);
 
-  const monthlyTrendData: MonthlyTrendPoint[] = useMemo(() => {
-    const months = Array.from({ length: 6 }, (_, i) => shiftMonth(currentMonth(), i - 5));
-    return months.map((month) => {
-      const totals = monthlyTotals.get(month) ?? { income: 0, expense: 0 };
-      const [y, m] = month.split("-").map(Number);
-      const label = new Intl.DateTimeFormat("id-ID", { month: "short" }).format(new Date(y, m - 1, 1));
-      return { month, label, income: totals.income, expense: totals.expense, net: totals.income - totals.expense };
-    });
-  }, [monthlyTotals]);
-
   const expenseBreakdown = useMemo(() => {
     const byCategory = new Map<string, number>();
     for (const t of allTransactions) {
@@ -271,7 +200,7 @@ export default function Dashboard() {
     <div className="space-y-6">
       <DashboardHeader monthView={monthView} onChangeMonthView={setMonthView} onQuickSpend={() => setIsQuickSpendOpen(true)} />
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <QuickStatCard
           label="Total Saldo"
           value={formatCurrency(liquidCash, baseCurrency)}
@@ -298,9 +227,19 @@ export default function Dashboard() {
           isPrivate={isPrivate}
         />
         <QuickStatCard label="Rasio Tabungan" value={`${savingsRate.toFixed(0)}%`} icon={PiggyBank} changePct={savingsRateChangePct} isPrivate={isPrivate} />
-        <QuickStatCard label="Nilai Kekayaan" value={formatCurrency(summary.netWorth, baseCurrency)} icon={Gem} changePct={netWorthChangePct} isPrivate={isPrivate} />
         <FinancialHealthGauge score={healthScore} />
       </div>
+
+      <NetWorthHero
+        netWorth={summary.netWorth}
+        totalAssets={summary.totalAssets}
+        totalLiabilities={summary.totalLiabilities}
+        snapshots={snapshots}
+        currency={baseCurrency}
+        isPrivate={isPrivate}
+        goal={goal}
+        onOpenGoal={() => setIsGoalModalOpen(true)}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
         <CashFlowChart data={cashFlowData} currency={baseCurrency} monthLabel={monthLabel} />
@@ -325,56 +264,7 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
-        <AIInsightCard insights={insights} />
-        <MonthlyTrendChart data={monthlyTrendData} currency={baseCurrency} />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
-        <BillsSummaryCard bills={bills} currency={baseCurrency} />
-        <AccountBalancesList accounts={accounts} isPrivate={isPrivate} />
-      </div>
-
-      <PortfolioPulseBar items={pulseItems} />
-
-      <NetWorthHero
-        netWorth={summary.netWorth}
-        totalAssets={summary.totalAssets}
-        totalLiabilities={summary.totalLiabilities}
-        snapshots={snapshots}
-        currency={baseCurrency}
-        isPrivate={isPrivate}
-        goal={goal}
-        onOpenGoal={() => setIsGoalModalOpen(true)}
-      />
-
-      <HealthMetricsGrid
-        liquidCash={liquidCash}
-        monthlyExpenseEstimate={monthlyExpenseEstimate}
-        debtRatio={debtRatio}
-        liquidMarketTotal={liquidMarketTotal}
-        totalAssets={summary.totalAssets}
-        investmentGainPct={investmentGainPct}
-        currency={baseCurrency}
-        isPrivate={isPrivate}
-      />
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <div className="lg:col-span-8 space-y-6">
-          <GrowthChart
-            snapshots={snapshots}
-            currentNetWorth={summary.netWorth}
-            currency={baseCurrency}
-            isPrivate={isPrivate}
-            onRecordSnapshot={() => recordSnapshot()}
-          />
-        </div>
-
-        <div className="lg:col-span-4 space-y-6">
-          <AllocationBreakdown buckets={allocationBuckets} totalAssets={summary.totalAssets} currency={baseCurrency} isPrivate={isPrivate} />
-          <ActivityFeed transactions={recentTransactions} categoryMap={categoryMap} accountMap={accountMap} isPrivate={isPrivate} />
-        </div>
-      </div>
+      <AIInsightCard insights={insights} />
 
       <GoalModal open={isGoalModalOpen} onClose={() => setIsGoalModalOpen(false)} goal={goal} onSave={setGoal} currency={baseCurrency} />
 

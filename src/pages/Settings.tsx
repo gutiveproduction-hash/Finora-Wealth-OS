@@ -75,161 +75,168 @@ export default function Settings() {
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <section className="card p-5 space-y-4">
-        <h2 className="font-medium">Mata Uang</h2>
-        <div>
-          <label className="label">Mata Uang Utama (untuk laporan gabungan)</label>
-          <select className="input max-w-xs" value={baseCurrency} onChange={(e) => setBaseCurrency(e.target.value)}>
-            {COMMON_CURRENCIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="label">Kurs Konversi (1 unit mata uang = X {baseCurrency})</label>
-          <p className="text-xs text-neutral-400 mb-2">
-            Aplikasi ini sepenuhnya offline sehingga kurs tidak diperbarui otomatis — masukkan kurs terbaru secara
-            manual sesuai kebutuhan Anda.
-          </p>
-          <div className="space-y-2">
-            {rates.map((r) => (
-              <div key={r.currency} className="flex items-center gap-2">
-                <span className="w-14 text-sm font-medium">{r.currency}</span>
-                <input
-                  // Input tak terkontrol: kunci ikut nilainya supaya field ikut
-                  // ter-update saat kurs dihitung ulang (mis. ganti mata uang utama).
-                  key={`${r.currency}-${r.rateToBase}`}
-                  className="input !w-40"
-                  type="number"
-                  step="any"
-                  defaultValue={r.rateToBase}
-                  disabled={r.currency === baseCurrency}
-                  onBlur={(e) => handleRateChange(r.currency, e.target.value)}
-                />
-                {r.currency !== baseCurrency && r.currency !== "IDR" && (
-                  <button
-                    className="btn-ghost !p-1.5 text-red-500"
-                    onClick={async () => {
-                      await window.api.exchangeRates.delete(r.currency);
-                      await refreshRates();
-                    }}
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-          <div className="flex gap-2 mt-3">
-            <select className="input !w-40" id="add-currency-select">
-              {COMMON_CURRENCIES.filter((c) => !rates.some((r) => r.currency === c)).map((c) => (
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+      {/* One column per stack: the currency table is far taller than the rest,
+          so letting a grid or CSS columns balance them leaves cards stranded. */}
+      <div className="space-y-6">
+        <section className="card p-5 space-y-4">
+          <h2 className="font-medium">Mata Uang</h2>
+          <div>
+            <label className="label">Mata Uang Utama (untuk laporan gabungan)</label>
+            <select className="input max-w-xs" value={baseCurrency} onChange={(e) => setBaseCurrency(e.target.value)}>
+              {COMMON_CURRENCIES.map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
               ))}
             </select>
-            <button
-              className="btn-secondary text-sm"
-              onClick={() => {
-                const select = document.getElementById("add-currency-select") as HTMLSelectElement | null;
-                if (select?.value) handleAddCurrency(select.value);
-              }}
-            >
-              <Plus size={14} /> Tambah Mata Uang
+          </div>
+
+          <div>
+            <label className="label">Kurs Konversi (1 unit mata uang = X {baseCurrency})</label>
+            <p className="text-xs text-neutral-400 mb-2">
+              Aplikasi ini sepenuhnya offline sehingga kurs tidak diperbarui otomatis — masukkan kurs terbaru secara
+              manual sesuai kebutuhan Anda.
+            </p>
+            <div className="space-y-2">
+              {rates.map((r) => (
+                <div key={r.currency} className="flex items-center gap-2">
+                  <span className="w-14 text-sm font-medium">{r.currency}</span>
+                  <input
+                    // Input tak terkontrol: kunci ikut nilainya supaya field ikut
+                    // ter-update saat kurs dihitung ulang (mis. ganti mata uang utama).
+                    key={`${r.currency}-${r.rateToBase}`}
+                    className="input !w-40"
+                    type="number"
+                    step="any"
+                    defaultValue={r.rateToBase}
+                    disabled={r.currency === baseCurrency}
+                    onBlur={(e) => handleRateChange(r.currency, e.target.value)}
+                  />
+                  {r.currency !== baseCurrency && r.currency !== "IDR" && (
+                    <button
+                      className="btn-ghost !p-1.5 text-red-500"
+                      onClick={async () => {
+                        await window.api.exchangeRates.delete(r.currency);
+                        await refreshRates();
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2 mt-3">
+              <select className="input !w-40" id="add-currency-select">
+                {COMMON_CURRENCIES.filter((c) => !rates.some((r) => r.currency === c)).map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+              <button
+                className="btn-secondary text-sm"
+                onClick={() => {
+                  const select = document.getElementById("add-currency-select") as HTMLSelectElement | null;
+                  if (select?.value) handleAddCurrency(select.value);
+                }}
+              >
+                <Plus size={14} /> Tambah Mata Uang
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div className="space-y-6">
+        <section className="card p-5 space-y-4">
+          <h2 className="font-medium">Kategori</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-sm font-medium text-emerald-600 mb-2">Pemasukan</h3>
+              <ul className="space-y-1">
+                {categories
+                  .filter((c) => c.type === "income")
+                  .map((c) => (
+                    <li key={c.id} className="flex items-center justify-between text-sm">
+                      <span>{c.name}</span>
+                      <button className="text-neutral-400 hover:text-red-500" onClick={() => handleDeleteCategory(c.id)}>
+                        <Trash2 size={13} />
+                      </button>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-red-600 mb-2">Pengeluaran</h3>
+              <ul className="space-y-1">
+                {categories
+                  .filter((c) => c.type === "expense")
+                  .map((c) => (
+                    <li key={c.id} className="flex items-center justify-between text-sm">
+                      <span>{c.name}</span>
+                      <button className="text-neutral-400 hover:text-red-500" onClick={() => handleDeleteCategory(c.id)}>
+                        <Trash2 size={13} />
+                      </button>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          </div>
+          {categoryError && (
+            <p className="text-xs text-red-600 dark:text-red-400">{categoryError}</p>
+          )}
+          <div className="flex gap-2 pt-2 border-t border-neutral-100 dark:border-neutral-800">
+            <input
+              className="input"
+              placeholder="Nama kategori baru"
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+            />
+            <select className="input !w-40" value={newCategoryType} onChange={(e) => setNewCategoryType(e.target.value as CategoryType)}>
+              <option value="expense">Pengeluaran</option>
+              <option value="income">Pemasukan</option>
+            </select>
+            <button className="btn-primary shrink-0" onClick={handleAddCategory}>
+              <Plus size={14} /> Tambah
             </button>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="card p-5 space-y-4">
-        <h2 className="font-medium">Kategori</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <h3 className="text-sm font-medium text-emerald-600 mb-2">Pemasukan</h3>
-            <ul className="space-y-1">
-              {categories
-                .filter((c) => c.type === "income")
-                .map((c) => (
-                  <li key={c.id} className="flex items-center justify-between text-sm">
-                    <span>{c.name}</span>
-                    <button className="text-neutral-400 hover:text-red-500" onClick={() => handleDeleteCategory(c.id)}>
-                      <Trash2 size={13} />
-                    </button>
-                  </li>
-                ))}
-            </ul>
+        <section className="card p-5 space-y-3">
+          <h2 className="font-medium">Data & Cadangan (Backup)</h2>
+          <p className="text-xs text-neutral-400">
+            Semua data tersimpan secara lokal di komputer Anda dalam file SQLite — tidak ada server, tidak ada akun,
+            tidak ada telemetri. Ekspor data secara berkala sebagai cadangan.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button className="btn-secondary" onClick={handleExport}>
+              <Download size={16} /> Ekspor Data (JSON)
+            </button>
+            <button className="btn-secondary" onClick={() => setConfirmImport(true)}>
+              <Upload size={16} /> Impor Data (JSON)
+            </button>
+            <button className="btn-ghost" onClick={() => window.api.backup.revealDbFile()}>
+              <FolderOpen size={16} /> Buka Lokasi File Database
+            </button>
           </div>
-          <div>
-            <h3 className="text-sm font-medium text-red-600 mb-2">Pengeluaran</h3>
-            <ul className="space-y-1">
-              {categories
-                .filter((c) => c.type === "expense")
-                .map((c) => (
-                  <li key={c.id} className="flex items-center justify-between text-sm">
-                    <span>{c.name}</span>
-                    <button className="text-neutral-400 hover:text-red-500" onClick={() => handleDeleteCategory(c.id)}>
-                      <Trash2 size={13} />
-                    </button>
-                  </li>
-                ))}
-            </ul>
-          </div>
-        </div>
-        {categoryError && (
-          <p className="text-xs text-red-600 dark:text-red-400">{categoryError}</p>
-        )}
-        <div className="flex gap-2 pt-2 border-t border-neutral-100 dark:border-neutral-800">
-          <input
-            className="input"
-            placeholder="Nama kategori baru"
-            value={newCategoryName}
-            onChange={(e) => setNewCategoryName(e.target.value)}
-          />
-          <select className="input !w-40" value={newCategoryType} onChange={(e) => setNewCategoryType(e.target.value as CategoryType)}>
-            <option value="expense">Pengeluaran</option>
-            <option value="income">Pemasukan</option>
-          </select>
-          <button className="btn-primary shrink-0" onClick={handleAddCategory}>
-            <Plus size={14} /> Tambah
-          </button>
-        </div>
-      </section>
+          {backupMsg && (
+            <p className={`text-xs ${backupMsg.ok ? "text-emerald-600" : "text-red-600 dark:text-red-400"}`}>{backupMsg.text}</p>
+          )}
+          <p className="text-xs text-neutral-400 break-all">Lokasi database: {dbPath}</p>
+        </section>
 
-      <section className="card p-5 space-y-3">
-        <h2 className="font-medium">Data & Cadangan (Backup)</h2>
-        <p className="text-xs text-neutral-400">
-          Semua data tersimpan secara lokal di komputer Anda dalam file SQLite — tidak ada server, tidak ada akun,
-          tidak ada telemetri. Ekspor data secara berkala sebagai cadangan.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <button className="btn-secondary" onClick={handleExport}>
-            <Download size={16} /> Ekspor Data (JSON)
-          </button>
-          <button className="btn-secondary" onClick={() => setConfirmImport(true)}>
-            <Upload size={16} /> Impor Data (JSON)
-          </button>
-          <button className="btn-ghost" onClick={() => window.api.backup.revealDbFile()}>
-            <FolderOpen size={16} /> Buka Lokasi File Database
-          </button>
-        </div>
-        {backupMsg && (
-          <p className={`text-xs ${backupMsg.ok ? "text-emerald-600" : "text-red-600 dark:text-red-400"}`}>{backupMsg.text}</p>
-        )}
-        <p className="text-xs text-neutral-400 break-all">Lokasi database: {dbPath}</p>
-      </section>
+        <section className="card p-5 space-y-2 text-sm text-neutral-500">
+          <h2 className="font-medium text-neutral-700 dark:text-neutral-200">Tentang Finora</h2>
+          <p>Versi {version || "-"}</p>
+          <p>
+            Finora adalah aplikasi pelacak keuangan pribadi &amp; portofolio investasi yang open source (lisensi MIT),
+            dibuat untuk berjalan sepenuhnya offline di komputer Anda.
+          </p>
+        </section>
+      </div>
 
-      <section className="card p-5 space-y-2 text-sm text-neutral-500">
-        <h2 className="font-medium text-neutral-700 dark:text-neutral-200">Tentang Finora</h2>
-        <p>Versi {version || "-"}</p>
-        <p>
-          Finora adalah aplikasi pelacak keuangan pribadi &amp; portofolio investasi yang open source (lisensi MIT),
-          dibuat untuk berjalan sepenuhnya offline di komputer Anda.
-        </p>
-      </section>
 
       <ConfirmDialog
         open={confirmImport}

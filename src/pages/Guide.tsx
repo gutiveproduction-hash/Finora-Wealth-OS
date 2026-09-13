@@ -61,10 +61,11 @@ const SECTIONS: { icon: LucideIcon; title: string; body: string }[] = [
 
 export default function Guide() {
   return (
-    <div className="max-w-3xl space-y-4">
+    <div className="space-y-4">
       <p className="text-sm text-neutral-500 dark:text-neutral-400">
         Panduan singkat fitur-fitur Finora, per menu di sidebar.
       </p>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
       {SECTIONS.map(({ icon: Icon, title, body }) => (
         <div key={title} className="card p-5 flex gap-3">
           <div className="p-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 h-fit shrink-0">
@@ -76,6 +77,7 @@ export default function Guide() {
           </div>
         </div>
       ))}
+      </div>
     </div>
   );
 }

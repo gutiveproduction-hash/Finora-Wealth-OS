@@ -52,12 +52,12 @@ export function NetWorthHero({
               {/* Warna badge ikut kondisinya — sebelumnya "Perlu Perhatian" pun tampil hijau. */}
               <motion.span
                 whileHover={{ scale: 1.05 }}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${
+                className={`badge-metal inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
                   debtRatio < 30
-                    ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200/60 dark:border-emerald-800/50"
+                    ? "text-emerald-300"
                     : debtRatio < 60
-                      ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200/60 dark:border-amber-800/50"
-                      : "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border-rose-200/60 dark:border-rose-800/50"
+                      ? "text-amber-300"
+                      : "text-rose-300"
                 }`}
               >
                 <span className="relative flex h-2 w-2">
@@ -87,8 +87,8 @@ export function NetWorthHero({
                   whileHover={{ scale: 1.04 }}
                   className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold ${
                     netWorthChange30d >= 0
-                      ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400"
-                      : "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400"
+                      ? "badge-metal-green text-emerald-200"
+                      : "badge-metal text-rose-200"
                   }`}
                 >
                   {netWorthChange30d >= 0 ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
