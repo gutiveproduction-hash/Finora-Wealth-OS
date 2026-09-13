@@ -9,14 +9,14 @@
     height: 100%;
   }
   :root {
-    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    letter-spacing: -0.015em;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    letter-spacing: -0.012em;
   }
   body {
     @apply antialiased;
   }
   .font-mono-numbers {
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Plus Jakarta Sans", system-ui, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum" 1, "cv01" 1, "cv02" 1;
     letter-spacing: -0.03em;
@@ -138,9 +138,6 @@
 }
 
 @layer components {
-  .card {
-    @apply liquid-glass rounded-2xl;
-  }
   .input {
     @apply liquid-glass-input w-full rounded-xl px-3 py-2 text-sm focus:outline-none placeholder:text-neutral-400;
   }
@@ -152,8 +149,7 @@
       transition-colors disabled:opacity-50 disabled:pointer-events-none select-none;
   }
   .btn-primary {
-    @apply btn bg-neutral-900 text-white hover:bg-neutral-800 active:bg-neutral-700
-      dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-100 shadow-xs;
+    @apply btn;
   }
   .btn-secondary {
     @apply btn liquid-glass-pill text-neutral-900 dark:text-neutral-100
@@ -165,4 +161,296 @@
   .btn-danger {
     @apply btn bg-rose-600 text-white hover:bg-rose-700;
   }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   iCloud Dashboard Archetype
+   Wallpaper canvas + bento tiles, modeled on the iCloud.com home.
+   `.card` (used across every page) rides on `.icloud-surface`, so the
+   whole app inherits the look; `.icloud-tile` adds the tile padding.
+   ═══════════════════════════════════════════════════════════════ */
+
+.icloud-canvas {
+  background:
+    /* pale aqua pool, upper left */
+    radial-gradient(80% 55% at 4% 10%, rgba(226, 246, 246, 1) 0%, transparent 60%),
+    /* deep blue ribbon sweeping out of the bottom-left corner */
+    radial-gradient(130% 44% at 10% 118%, rgba(20, 88, 196, 0.82) 0%, rgba(52, 142, 222, 0.42) 38%, transparent 70%),
+    /* second blue sweep entering from the right edge */
+    radial-gradient(105% 40% at 108% 24%, rgba(28, 104, 206, 0.72) 0%, transparent 62%),
+    /* the band that ties the two sweeps across the middle */
+    radial-gradient(150% 26% at 62% 58%, rgba(58, 140, 216, 0.36) 0%, transparent 68%),
+    /* mint pool, lower right */
+    radial-gradient(90% 66% at 84% 92%, rgba(142, 222, 210, 0.95) 0%, transparent 60%),
+    /* highlight catching the lower-left */
+    radial-gradient(55% 40% at 2% 94%, rgba(255, 255, 255, 0.9) 0%, transparent 58%),
+    linear-gradient(155deg, #e4f6f7 0%, #b9dcee 48%, #d3f0ec 100%);
+  background-attachment: fixed;
+}
+
+.dark .icloud-canvas {
+  background:
+    radial-gradient(80% 55% at 4% 10%, rgba(26, 86, 100, 0.95) 0%, transparent 60%),
+    radial-gradient(130% 44% at 10% 118%, rgba(20, 84, 188, 0.9) 0%, rgba(26, 106, 186, 0.5) 38%, transparent 70%),
+    radial-gradient(105% 40% at 108% 24%, rgba(24, 96, 186, 0.8) 0%, transparent 62%),
+    radial-gradient(150% 26% at 62% 58%, rgba(36, 112, 190, 0.4) 0%, transparent 68%),
+    radial-gradient(90% 66% at 84% 92%, rgba(24, 104, 106, 0.9) 0%, transparent 60%),
+    radial-gradient(55% 40% at 2% 94%, rgba(140, 215, 222, 0.26) 0%, transparent 58%),
+    linear-gradient(155deg, #08202e 0%, #07203c 48%, #062026 100%);
+  background-attachment: fixed;
+}
+
+/* Tile surface. No padding here — call sites bring their own p-* utilities. */
+/* `.card` is the app-wide card class; aliasing it here reskins every page. */
+.icloud-surface,
+.card {
+  position: relative;
+  border-radius: 28px;
+  transition: box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+
+.icloud-tile {
+  padding: 1.25rem 1.35rem 1.4rem;
+}
+
+.icloud-tile-hover:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 30px 60px -14px rgba(9, 30, 66, 0.34),
+    0 3px 8px -1px rgba(9, 30, 66, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.dark .icloud-tile-hover:hover {
+  box-shadow:
+    0 34px 70px -16px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+/* App-icon square in a tile header, iCloud style */
+.icloud-tile-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow:
+    0 4px 10px -2px rgba(9, 30, 66, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Chrome: the dark translucent bars iCloud keeps in both themes */
+.icloud-chrome {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.25);
+}
+
+
+.icloud-topbar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-radius: 9999px;
+  color: rgba(18, 34, 52, 0.82);
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .icloud-topbar-btn {
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.icloud-topbar-btn:hover {
+  background: rgba(255, 255, 255, 0.72);
+  color: #0b1b2b;
+}
+
+.dark .icloud-topbar-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+/* Sub-cards nested inside a tile sit on the tile, not on the wallpaper */
+.icloud-inset {
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.12);
+}
+
+
+/* Tailwind neutrals are tuned for flat surfaces; on a translucent tile
+   floating over the blue wallpaper they wash out, so lift them here. */
+.dark .icloud-surface .text-neutral-400,
+.dark .card .text-neutral-400,
+.dark .icloud-surface.text-neutral-400,
+.dark .card.text-neutral-400,
+.dark .icloud-surface .text-neutral-500,
+.dark .card .text-neutral-500,
+.dark .icloud-surface.text-neutral-500,
+.dark .card.text-neutral-500 { color: rgba(232, 240, 255, 0.7); }
+.dark .icloud-surface .text-neutral-300,
+.dark .card .text-neutral-300,
+.dark .icloud-surface.text-neutral-300,
+.dark .card.text-neutral-300 { color: rgba(240, 246, 255, 0.85); }
+.icloud-surface .text-neutral-500,
+.card .text-neutral-500,
+.icloud-surface.text-neutral-500,
+.card.text-neutral-500 { color: #4b5c78; }
+.icloud-surface .text-neutral-400,
+.card .text-neutral-400,
+.icloud-surface.text-neutral-400,
+.card.text-neutral-400 { color: #64748b; }
+
+
+/* --- Gunmetal controls ----------------------------------------------- */
+/* Brushed-metal primary buttons: a light top bevel, a dark bottom edge,
+   and a cool grey body that stays neutral against the blue wallpaper. */
+/* `.btn-primary` is the app-wide primary action button. */
+.icloud-metal,
+.btn-primary {
+  background: linear-gradient(180deg, #5b636f 0%, #454d58 46%, #2f353e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-bottom-color: rgba(0, 0, 0, 0.5);
+  color: #eef1f5;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 6px 14px -5px rgba(0, 0, 0, 0.55);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.icloud-metal:hover,
+.btn-primary:hover {
+  background: linear-gradient(180deg, #69717e 0%, #4f5864 46%, #363d47 100%);
+  color: #fff;
+}
+
+.icloud-metal:active,
+.btn-primary:active {
+  background: linear-gradient(180deg, #3c434d 0%, #2c323b 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+
+@keyframes navPop {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+
+/* --- iOS context menu -------------------------------------------------
+   Liquid Glass: the surface has to refract what is behind it, not just sit
+   on top of it. That means a genuinely thin base tint, a hard blur with a
+   saturation + brightness lift (this is what reads as "lensed"), a bright
+   specular rim along the top edge, and an inner sheen falling away from the
+   light. Rows are full-bleed with hairlines inset from the leading edge. */
+.ios-menu {
+  border-radius: 28px;
+  overflow: hidden;
+  isolation: isolate;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+
+/* Specular sheen — the highlight rolling off the top-left of the lens */
+
+
+/* Hairline between rows, inset from the leading edge the way iOS draws it */
+.ios-menu-row {
+  position: relative;
+}
+
+.ios-menu-row + .ios-menu-row::before {
+  content: "";
+  position: absolute;
+  left: 17px;
+  right: 0;
+  top: 0;
+  height: 0.5px;
+  background: rgba(0, 0, 0, 0.07);
+}
+
+.dark .ios-menu-row + .ios-menu-row::before {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.ios-menu-row:hover {
+  background: rgba(0, 0, 0, 0.045);
+}
+.ios-menu-row:active {
+  background: rgba(0, 0, 0, 0.09);
+}
+.dark .ios-menu-row:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.dark .ios-menu-row:active {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* Section break: a band of the underlying glass, darker than the rows */
+.ios-menu-gap {
+  height: 8px;
+  background: rgba(0, 0, 0, 0.035);
+}
+.dark .ios-menu-gap {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+
+
+
+/* --- Gunmetal status badge ------------------------------------------
+   Same machined treatment as the primary buttons, but scaled down for a
+   pill. The surface is always metal; the label and dot keep the semantic
+   colour so "Perlu Perhatian" still reads as a warning. */
+.badge-metal {
+  background: linear-gradient(180deg, #545c68 0%, #3e4650 48%, #2b313a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-bottom-color: rgba(0, 0, 0, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 2px 5px -1px rgba(0, 0, 0, 0.35);
+}
+
+
+/* Gunmetal with a green cast, for the positive-delta chip. */
+.badge-metal-green {
+  background: linear-gradient(180deg, #4a6357 0%, #35493f 48%, #23322c 100%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-bottom-color: rgba(0, 0, 0, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(210, 255, 232, 0.28),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 2px 5px -1px rgba(0, 0, 0, 0.35);
 }

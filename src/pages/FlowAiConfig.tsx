@@ -6,12 +6,12 @@ export default function FlowAiConfig() {
   const { settings, setSettings } = useAiInsightSettings();
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="space-y-6">
       <div className="card p-5 flex items-start gap-3">
         <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-500 shrink-0">
           <Sparkles className="w-4 h-4" />
         </div>
-        <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
+        <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed max-w-4xl">
           FlowAI adalah mesin insight <strong>berbasis aturan yang berjalan lokal</strong> — bukan model AI yang
           memanggil server eksternal. Semua analisisnya dihitung langsung dari data transaksi & target kamu di
           perangkat ini. Pengaturan di halaman ini menentukan ambang batas yang dipakai kartu "AI Insight" di
@@ -34,7 +34,7 @@ export default function FlowAiConfig() {
             type="number"
             min={0}
             max={100}
-            className="input"
+            className="input max-w-[10rem]"
             value={settings.healthySavingsRate}
             onChange={(e) => setSettings({ ...settings, healthySavingsRate: Number(e.target.value) || 0 })}
           />

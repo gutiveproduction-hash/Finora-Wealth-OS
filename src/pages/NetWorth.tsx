@@ -1,13 +1,29 @@
-import { useNetWorth } from "@/hooks/useNetWorth";
+import { usePortfolioMetrics } from "@/hooks/usePortfolioMetrics";
 import { NetWorthTrendChart } from "@/components/charts/NetWorthTrendChart";
+import { GrowthChart } from "@/components/dashboard/GrowthChart";
+import { HealthMetricsGrid } from "@/components/dashboard/HealthMetricsGrid";
+import { AllocationBreakdown } from "@/components/dashboard/AllocationBreakdown";
+import { PortfolioPulseBar } from "@/components/dashboard/PortfolioPulseBar";
 import { StatCard } from "@/components/ui/StatCard";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { Scale, TrendingUp, TrendingDown } from "lucide-react";
 
 export default function NetWorth() {
-  const { summary, snapshots, recordSnapshot, loading } = useNetWorth();
+  const {
+    summary,
+    snapshots,
+    recordSnapshot,
+    liquidCash,
+    monthlyExpenseEstimate,
+    liquidMarketTotal,
+    investmentGainPct,
+    allocationBuckets,
+    pulseItems,
+    debtRatio,
+  } = usePortfolioMetrics();
   const baseCurrency = useSettingsStore((s) => s.baseCurrency);
+  const isPrivate = useSettingsStore((s) => s.isPrivate);
 
   const first = snapshots[0];
   const changeSinceFirst = summary && first ? summary.netWorth - first.netWorth : null;
@@ -36,11 +52,44 @@ export default function NetWorth() {
               </p>
             )}
           </div>
-          <button className="btn-primary" onClick={() => recordSnapshot()} disabled={loading}>
+          <button className="btn-primary" onClick={() => recordSnapshot()}>
             Catat Snapshot Hari Ini
           </button>
         </div>
         <NetWorthTrendChart snapshots={snapshots} baseCurrency={baseCurrency} />
+      </div>
+
+      <PortfolioPulseBar items={pulseItems} />
+
+      <HealthMetricsGrid
+        liquidCash={liquidCash}
+        monthlyExpenseEstimate={monthlyExpenseEstimate}
+        debtRatio={debtRatio}
+        liquidMarketTotal={liquidMarketTotal}
+        totalAssets={summary?.totalAssets ?? 0}
+        investmentGainPct={investmentGainPct}
+        currency={baseCurrency}
+        isPrivate={isPrivate}
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="lg:col-span-8">
+          <GrowthChart
+            snapshots={snapshots}
+            currentNetWorth={summary?.netWorth ?? 0}
+            currency={baseCurrency}
+            isPrivate={isPrivate}
+            onRecordSnapshot={() => recordSnapshot()}
+          />
+        </div>
+        <div className="lg:col-span-4">
+          <AllocationBreakdown
+            buckets={allocationBuckets}
+            totalAssets={summary?.totalAssets ?? 0}
+            currency={baseCurrency}
+            isPrivate={isPrivate}
+          />
+        </div>
       </div>
 
       <div className="card p-5">

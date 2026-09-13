@@ -35,13 +35,14 @@ export function DashboardHeader({
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="text-right hidden sm:block">
-          <div className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+        <div className="hidden sm:flex items-center gap-2 text-xs font-semibold text-neutral-700 dark:text-neutral-200">
+          <span>
             {new Intl.DateTimeFormat("id-ID", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }).format(now)}
-          </div>
-          <div className="text-[11px] text-neutral-400 font-mono-numbers">
+          </span>
+          <span className="w-px h-3 bg-neutral-900/20 dark:bg-white/25" />
+          <span className="font-mono-numbers text-neutral-600 dark:text-neutral-300">
             {new Intl.DateTimeFormat("id-ID", { hour: "2-digit", minute: "2-digit" }).format(now)}
-          </div>
+          </span>
         </div>
 
         <motion.button whileTap={{ scale: 0.96 }} onClick={onQuickSpend} className="btn-primary text-xs !px-3 !py-2">

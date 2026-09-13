@@ -1,5 +1,5 @@
 import { useLocation } from "react-router-dom";
-import { Moon, Sun, Monitor, Eye, EyeOff } from "lucide-react";
+import { Moon, Sun, Monitor, Eye, EyeOff, Layers } from "lucide-react";
 import { useSettingsStore, applyThemeClass, type ThemePreference } from "@/store/useSettingsStore";
 
 const TITLES: Record<string, string> = {
@@ -29,20 +29,38 @@ export function TopBar() {
   const isPrivate = useSettingsStore((s) => s.isPrivate);
   const togglePrivacy = useSettingsStore((s) => s.togglePrivacy);
   const title = TITLES[location.pathname] ?? "Finora";
+  // On macOS the window uses an inset title bar; the traffic-light buttons are drawn
+  // over this header now that the left rail is gone, so keep the title clear of them.
+  const isMacElectron = typeof window !== "undefined" && window.api?.platform === "darwin";
 
   return (
-    <header className="h-16 shrink-0 border-b border-neutral-200/70 dark:border-neutral-800/80 flex items-center justify-between px-6 bg-[#FBFBFA]/90 dark:bg-[#121316]/90 backdrop-blur-md">
-      <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
+    <header
+      className={`icloud-chrome h-14 shrink-0 border-b flex items-center justify-between pr-6 ${
+        isMacElectron ? "pl-24" : "pl-6"
+      }`}
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="icloud-metal w-7 h-7 rounded-lg flex items-center justify-center shrink-0">
+          <Layers className="w-3.5 h-3.5" />
+        </div>
+        <span className="font-semibold text-[15px] tracking-tight text-neutral-900 dark:text-white shrink-0">
+          Finora
+        </span>
+        <span className="w-px h-4 bg-neutral-900/15 dark:bg-white/20 shrink-0" />
+        <h1 className="text-[15px] font-medium tracking-tight text-neutral-600 dark:text-neutral-300 truncate">
+          {title}
+        </h1>
+      </div>
       <div className="flex items-center gap-2">
         <button
           onClick={togglePrivacy}
           title={isPrivate ? "Tampilkan Angka" : "Sembunyikan Angka"}
-          className="p-2 rounded-lg text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800/80 transition-colors"
+          className="icloud-topbar-btn w-9 h-9"
         >
           {isPrivate ? <EyeOff size={16} /> : <Eye size={16} />}
         </button>
 
-        <div className="flex items-center gap-1 bg-neutral-100 dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800/80 rounded-lg p-1">
+        <div className="flex items-center gap-1 rounded-full p-1 bg-white/45 border border-white/70 dark:bg-white/10 dark:border-white/15">
           {THEME_OPTIONS.map(({ value, icon: Icon }) => (
             <button
               key={value}
@@ -50,10 +68,10 @@ export function TopBar() {
                 setTheme(value);
                 applyThemeClass(value);
               }}
-              className={`p-1.5 rounded-md transition-colors ${
+              className={`p-1.5 rounded-full transition-colors ${
                 theme === value
-                  ? "bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 shadow-xs"
-                  : "text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
+                  ? "bg-white/85 text-neutral-900 shadow-sm dark:bg-white/25 dark:text-white"
+                  : "text-neutral-500 hover:text-neutral-900 dark:text-white/60 dark:hover:text-white"
               }`}
               title={value}
             >
